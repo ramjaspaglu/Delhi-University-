@@ -962,7 +962,7 @@ const RatingButtons = ({ material, user }: { material: Material, user: FirebaseU
             userId: voterId,
             userEmail: user?.email || 'anonymous',
             userFullName: user?.displayName || 'Anonymous Voter',
-            actionType: `VOTE_${type}`,
+            action: `VOTE_${type}`,
             details: { 
               materialId: material.id, 
               title: material.title,
@@ -3123,7 +3123,7 @@ export default function App() {
         userId: user?.uid || 'anonymous',
         userEmail: user?.email || 'anonymous',
         userFullName: userProfile?.fullName || (user?.displayName) || 'Anonymous Visitor',
-        actionType,
+        action: actionType,
         details,
         timestamp: new Date().toISOString()
       });
@@ -3300,12 +3300,11 @@ export default function App() {
           flagThreshold: data.flagThreshold !== undefined ? data.flagThreshold : 5
         });
       } else {
-        setDoc(doc(db, 'settings', 'moderation'), {
+        // Document does not exist yet; default locally but do not attempt to write as non-admin
+        setModerationSettings({
           mode: 'approve_queue',
-          flagThreshold: 5,
-          updatedAt: new Date().toISOString(),
-          updatedBy: 'System'
-        }).catch(console.error);
+          flagThreshold: 5
+        });
       }
     }, (error) => {
       console.warn("Trouble reading system moderation settings. Defaulting locally to approved review queue.", error);
@@ -6641,128 +6640,6 @@ export default function App() {
             </motion.div>
           );
         })()}
-      </AnimatePresence>
-
-      {/* Notifications Toast */}
-      {notifications.filter(n => n.mode !== 'popup').length > 0 && (
-        <div className="fixed bottom-24 right-6 z-[100] flex flex-col gap-3 max-h-[80vh] overflow-y-auto pointer-events-auto">
-          {notifications.filter(n => n.mode !== 'popup').map(notif => (
-            <motion.div
-              key={notif.id}
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              className="w-[320px] bg-slate-900 border border-slate-700 shadow-2xl rounded-apple-lg p-5 flex flex-col gap-3 relative"
-            >
-              <div className="flex gap-3">
-                <div className="shrink-0 pt-0.5">
-                  <div className="w-8 h-8 rounded-full bg-emerald-600/20 text-emerald-400 flex flex-col items-center justify-center">
-                    <CheckCircle2 size={16} />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-[11px] font-black uppercase tracking-wider text-white">Status Update</h4>
-                  <p className="text-xs font-semibold text-slate-300 mt-1.5 leading-relaxed">{notif.message}</p>
-                </div>
-              </div>
-              
-              {notif.notes && (
-                <div className="bg-slate-800 border border-slate-700/50 p-2.5 rounded-md mt-1">
-                  <p className="text-[10px] font-bold text-slate-400 capitalize tracking-wide">{notif.notes}</p>
-                </div>
-              )}
-
-              <div className="flex gap-2 mt-2 pt-2 border-t border-slate-700">
-                {notif.url && (
-                  <a
-                    href={notif.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[9px] uppercase tracking-widest text-center rounded transition-colors"
-                  >
-                    View Link
-                  </a>
-                )}
-                <button
-                  onClick={async () => {
-                    if (notif.targetEmail === 'ALL') {
-                      const hidden = JSON.parse(localStorage.getItem('hiddenGlobalNotifs') || '[]');
-                      hidden.push(notif.id);
-                      localStorage.setItem('hiddenGlobalNotifs', JSON.stringify(hidden));
-                      setNotifications(prev => prev.filter(n => n.id !== notif.id));
-                    } else {
-                      import('firebase/firestore').then(({ doc, updateDoc }) => {
-                        updateDoc(doc(db, 'notifications', notif.id), { isRead: true });
-                      });
-                    }
-                  }}
-                  className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-black text-[9px] uppercase tracking-widest text-center rounded transition-colors"
-                >
-                  Dismiss
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      )}
-
-      {/* Global Immersive Popup Notifications */}
-      <AnimatePresence>
-        {notifications.filter(n => n.mode === 'popup').map(notif => (
-          <div key={`popup-${notif.id}`} className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm pointer-events-auto">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-md bg-white border border-slate-200 shadow-2xl rounded-2xl overflow-hidden"
-            >
-              <div className="bg-slate-900 border-b border-slate-800 p-6 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                  <Megaphone size={20} />
-                </div>
-                <div>
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Important Update</h3>
-                  <p className="text-sm font-bold text-white mt-0.5">{notif.message}</p>
-                </div>
-              </div>
-              
-              <div className="p-6 space-y-5 flex flex-col items-center">
-                {notif.notes && (
-                  <p className="text-sm text-slate-600 font-medium leading-relaxed text-center">{notif.notes}</p>
-                )}
-                
-                <div className="flex gap-3 w-full">
-                  <button
-                    onClick={() => {
-                      if (notif.targetEmail === 'ALL') {
-                        const hidden = JSON.parse(localStorage.getItem('hiddenGlobalNotifs') || '[]');
-                        hidden.push(notif.id);
-                        localStorage.setItem('hiddenGlobalNotifs', JSON.stringify(hidden));
-                        setNotifications(prev => prev.filter(n => n.id !== notif.id));
-                      } else {
-                        import('firebase/firestore').then(({ doc, updateDoc }) => {
-                          updateDoc(doc(db, 'notifications', notif.id), { isRead: true });
-                        });
-                      }
-                    }}
-                    className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-[10px] uppercase tracking-widest rounded-lg transition-colors border border-slate-200"
-                  >
-                    Acknowledge
-                  </button>
-                  {notif.url && (
-                    <a
-                      href={notif.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 py-3 bg-slate-900 hover:bg-emerald-600 text-white font-black text-[10px] uppercase tracking-widest rounded-lg transition-colors flex items-center justify-center cursor-pointer text-center"
-                    >
-                      View Details
-                    </a>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        ))}
       </AnimatePresence>
 
       {/* Global Floating Report action */}

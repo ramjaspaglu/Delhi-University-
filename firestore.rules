@@ -106,7 +106,8 @@ service cloud.firestore {
              (!data.keys().hasAll(['hasConsented']) || data.hasConsented is bool) &&
              (!data.keys().hasAll(['skippedOnboarding']) || data.skippedOnboarding is bool) &&
              (!data.keys().hasAll(['onboardedAt']) || (data.onboardedAt is string && data.onboardedAt.size() <= 100)) &&
-             (!data.keys().hasAll(['updatedAt']) || (data.updatedAt is string && data.updatedAt.size() <= 100));
+             (!data.keys().hasAll(['updatedAt']) || (data.updatedAt is string && data.updatedAt.size() <= 100)) &&
+             (!data.keys().hasAll(['createdAt']) || (data.createdAt is string && data.createdAt.size() <= 100));
     }
 
     function isValidFeatureProposal(data) {
@@ -125,7 +126,10 @@ service cloud.firestore {
       return data.keys().hasAll(['action', 'timestamp']) &&
              data.action is string && data.action.size() <= 200 &&
              data.timestamp is string && data.timestamp.size() <= 100 &&
-             (!data.keys().hasAll(['userId']) || (data.userId is string && data.userId.size() <= 128));
+             (!data.keys().hasAll(['userId']) || (data.userId is string && data.userId.size() <= 128)) &&
+             (!data.keys().hasAll(['userEmail']) || (data.userEmail is string && data.userEmail.size() <= 200)) &&
+             (!data.keys().hasAll(['userFullName']) || (data.userFullName is string && data.userFullName.size() <= 200)) &&
+             (!data.keys().hasAll(['details']) || (data.details is map || data.details is string));
     }
 
     function isValidReport(data) {
@@ -189,7 +193,9 @@ service cloud.firestore {
 
     // 4. Submissions
     match /submissions/{submissionId} {
-      allow get, list: if isAdmin() || (isSignedIn() && resource.data.submittedByEmail == request.auth.token.email) || resource.data.status == 'PUBLISHED';
+      allow read: if isAdmin();
+      allow read: if isSignedIn() && 'submittedByEmail' in resource.data && resource.data.submittedByEmail == request.auth.token.email;
+      allow read: if 'status' in resource.data && resource.data.status == 'PUBLISHED';
       allow create: if isSignedIn() && isValidSubmission(incoming()) && 
                     incoming().submittedByEmail == request.auth.token.email &&
                     (incoming().status == 'PENDING' || incoming().status == 'PUBLISHED' || isAdmin());
@@ -201,11 +207,9 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isSignedIn() && (userId == 'DU-' + request.auth.uid || isAdmin());
       allow create: if isSignedIn() && userId == 'DU-' + request.auth.uid && isValidUser(incoming()) && 
-                    incoming().uin == userId &&
                     !incoming().keys().hasAny(['role', 'isAdmin']);
       allow update: if isAdmin() || (isSignedIn() && userId == 'DU-' + request.auth.uid && isValidUser(incoming()) && 
                     (incoming().email == existing().email || !('email' in existing())) &&
-                    incoming().uin == userId &&
                     !incoming().keys().hasAny(['role', 'isAdmin']));
       allow delete: if isAdmin();
     }
@@ -232,7 +236,7 @@ service cloud.firestore {
 
     match /user_behavior_logs/{logId} {
       allow read: if isAdmin();
-      allow create: if isSignedIn() && isValidBehaviorLog(incoming());
+      allow create: if isValidBehaviorLog(incoming());
       allow update, delete: if false;
     }
 
@@ -260,7 +264,7 @@ service cloud.firestore {
     match /notifications/{notificationId} {
       allow read: if true; 
       allow create: if isAdmin();
-      allow update: if (isSignedIn() && resource.data.targetEmail == request.auth.token.email) || (resource.data.targetDeviceId != null);
+      allow update: if (isSignedIn() && 'targetEmail' in resource.data && resource.data.targetEmail == request.auth.token.email) || ('targetDeviceId' in resource.data);
       allow delete: if isAdmin();
     }
   }

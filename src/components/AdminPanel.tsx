@@ -4819,7 +4819,6 @@ export default function AdminPanel({ courses, userEmail, onSelectCourse, onSelec
 function AnnouncementsTabSection() {
   const [announceTarget, setAnnounceTarget] = useState('ALL');
   const [announceEmail, setAnnounceEmail] = useState('');
-  const [announceType, setAnnounceType] = useState('popup'); // 'popup' or 'toast'
   const [announceMessage, setAnnounceMessage] = useState('');
   const [announceNotes, setAnnounceNotes] = useState('');
   const [announceUrl, setAnnounceUrl] = useState('');
@@ -4833,7 +4832,6 @@ function AnnouncementsTabSection() {
       const target = announceTarget === 'SPECIFIC' ? announceEmail : 'ALL';
       await addDoc(collection(db, 'notifications'), {
         targetEmail: target,
-        mode: announceType,
         message: announceMessage.trim(),
         notes: announceNotes.trim(),
         url: announceUrl.trim(),
@@ -4892,18 +4890,6 @@ function AnnouncementsTabSection() {
                   />
                 </div>
               )}
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-black uppercase text-slate-500 tracking-wider">Notification Type</label>
-              <select 
-                value={announceType}
-                onChange={(e) => setAnnounceType(e.target.value)}
-                className="w-full bg-white border border-slate-200 focus:border-slate-800 px-3 py-2 text-xs font-bold text-slate-700 rounded outline-none"
-              >
-                <option value="popup">Immersive Modal Popup (High Priority)</option>
-                <option value="toast">Floating Toast (Standard Update)</option>
-              </select>
             </div>
 
             <div className="space-y-1.5">

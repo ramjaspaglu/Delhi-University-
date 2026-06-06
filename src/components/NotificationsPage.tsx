@@ -6,7 +6,6 @@ interface NotificationItem {
   _mode: string; // 'email' | 'device' | 'global'
   targetEmail?: string;
   targetDeviceId?: string;
-  mode: 'popup' | 'toast';
   message: string;
   notes?: string;
   url?: string;
@@ -157,11 +156,6 @@ export default function NotificationsPage({
                         }`}>
                           {isGlobal ? 'Global Announcement' : 'Direct Message'}
                         </span>
-                        {notif.mode === 'popup' && (
-                          <span className="text-[9px] font-black uppercase tracking-[0.15em] px-2.5 py-1 bg-red-50 text-red-700 border border-red-100 rounded">
-                            Urgent Modal Alert
-                          </span>
-                        )}
                         <span className="text-[10px] font-bold text-slate-400 font-mono text-xs">
                           {formattedDate}
                         </span>
