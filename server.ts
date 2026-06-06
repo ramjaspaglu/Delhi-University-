@@ -241,12 +241,11 @@ function getSuggestion(query: string, allItems: any[]): string | null {
 let CACHED_SCRAPE: any[] | null = null;
 let LAST_SCRAPE_TIME = 0;
 
-async function startServer() {
-  const app = express();
-  const PORT = 3000;
+export const app = express();
+const PORT = process.env.PORT || 3000;
 
-  // Ultimate Security Shield: Anti-Crawl, Anti-Scrape, Anti-Scrawl & Anti-Exploit Middleware
-  app.use((req, res, next) => {
+// Ultimate Security Shield: Anti-Crawl, Anti-Scrape, Anti-Scrawl & Anti-Exploit Middleware
+app.use((req, res, next) => {
     const url = req.url.toLowerCase();
 
     // 1. Direct exemption for robots.txt (so polite bots can check their disallowed status)
@@ -1536,22 +1535,27 @@ Adhere strictly to this JSON schema:
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
+    createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
-    });
-    app.use(vite.middlewares);
+    }).then((vite) => {
+      app.use(vite.middlewares);
+    }).catch(err => console.error("Vite setup error", err));
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+    // Only serve static files if NOT on Vercel
+    if (!process.env.VERCEL) {
+      const distPath = path.join(process.cwd(), 'dist');
+      app.use(express.static(distPath));
+      app.get('*', (req, res) => {
+        res.sendFile(path.join(distPath, 'index.html'));
+      });
+    }
+  }
+
+  // Only listen on a port if not in serverless environment
+  if (!process.env.VERCEL) {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on http://localhost:${PORT}`);
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
-}
-
-startServer();
