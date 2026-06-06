@@ -42,12 +42,19 @@ export const ReportIssueModal: React.FC<ReportIssueModalProps> = ({
       const email = auth.currentUser?.email || 'anonymous';
       const pathForWrite = 'reports';
 
+      let deviceId = localStorage.getItem('deviceId');
+      if (!deviceId) {
+        deviceId = 'dev-' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('deviceId', deviceId);
+      }
+
       const payload = {
         reportedPage,
         status: 'PENDING',
         userDescription: userDescription.trim(),
         createdAt: new Date().toISOString(),
         reportedByEmail: email,
+        deviceId: deviceId,
         targetUrl: targetUrl.trim(),
         materialTitle: materialTitle.trim(),
         adminNotes: '',

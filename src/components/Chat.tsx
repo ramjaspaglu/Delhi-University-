@@ -32,18 +32,18 @@ const Chat = () => {
   };
 
   return (
-    <div className="fixed bottom-8 right-8 z-50">
+    <div className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-50">
       {!isOpen && (
         <button 
           onClick={() => setIsOpen(true)}
-          className="w-16 h-16 bg-emerald-600 text-white rounded-apple-xl shadow-emerald-sm hover:scale-110 active:scale-95 transition-all flex items-center justify-center group"
+          className="w-14 h-14 sm:w-16 sm:h-16 bg-emerald-600 text-white rounded-apple-xl shadow-emerald-sm hover:scale-110 active:scale-95 transition-all flex items-center justify-center group"
           id="chat-trigger"
         >
-          <MessageSquare size={28} className="group-hover:rotate-12 transition-transform" />
+          <MessageSquare size={24} className="group-hover:rotate-12 transition-transform sm:w-7 sm:h-7" />
         </button>
       )}
       {isOpen && (
-        <div className="w-[380px] h-[550px] bg-white rounded-apple-2xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300" id="chat-window">
+        <div className="w-[calc(100vw-32px)] sm:w-[380px] h-[75vh] min-h-[400px] max-h-[550px] bg-white rounded-apple-2xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-300" id="chat-window">
           <div className="p-6 border-b border-slate-50 flex justify-between items-center bg-white">
             <div className="flex items-center gap-3">
                <div className="w-8 h-8 bg-emerald-600 rounded-apple flex items-center justify-center text-white shadow-emerald-sm">

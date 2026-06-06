@@ -724,7 +724,7 @@ Perform the following verification checks:
         const fetchPromises = SCRAPERS.map(async (scraper) => {
           const results: any[] = [];
           try {
-            const response = await fetch(scraper.url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+            const response = await fetch(scraper.url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' } });
             if (!response.ok) return [];
             const html = await response.text();
             const $ = cheerio.load(html);
@@ -876,7 +876,7 @@ Perform the following verification checks:
     try {
       const s = SCRAPERS.find(x => x.name === 'Kalindi');
       if (!s) return res.json({ links: [] });
-      const response = await fetch(s.url);
+      const response = await fetch(s.url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' } });
       if (!response.ok) {
         return res.json({ links: [], error: "Failed to query Kalindi repository" });
       }
@@ -893,7 +893,7 @@ Perform the following verification checks:
     try {
       const s = SCRAPERS.find(x => x.name === 'Maitreyi');
       if (!s) return res.json({ links: [] });
-      const response = await fetch(s.url);
+      const response = await fetch(s.url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' } });
       if (!response.ok) {
         return res.json({ links: [], error: "Failed to query Maitreyi repository" });
       }
@@ -912,7 +912,7 @@ Perform the following verification checks:
       const targetPath = req.query.path as string;
       const baseUrl = "http://web.du.ac.in/PreviousQuestionPapers/";
       const url = targetPath ? `${baseUrl}${targetPath}` : baseUrl;
-      const response = await fetch(url);
+      const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' } });
       if (!response.ok) return res.status(response.status).json({ error: "Failed" });
       const html = await response.text();
       const $ = cheerio.load(html);

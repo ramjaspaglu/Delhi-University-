@@ -55,7 +55,9 @@ import {
   LockKeyhole,
   CheckCircle2,
   XCircle,
-  RefreshCw
+  RefreshCw,
+  Megaphone,
+  Send
 } from 'lucide-react';
 import { Course, Subject, Material } from '../types';
 
@@ -69,7 +71,7 @@ interface AdminPanelProps {
 
 export default function AdminPanel({ courses, userEmail, onSelectCourse, onSelectSubject, setActiveTab }: AdminPanelProps) {
   // Navigation inside Admin
-  const [activeAdminSubTab, setActiveAdminSubTab] = useState<'fetcher' | 'courses' | 'subjects' | 'submissions' | 'materials' | 'contributions' | 'ai-automation' | 'users' | 'behavior' | 'security-protocol' | 'reports' | 'labs-access'>('security-protocol');
+  const [activeAdminSubTab, setActiveAdminSubTab] = useState<'fetcher' | 'courses' | 'subjects' | 'submissions' | 'materials' | 'contributions' | 'ai-automation' | 'users' | 'behavior' | 'security-protocol' | 'reports' | 'labs-access' | 'announcements'>('security-protocol');
 
   // Reports Diary States
   const [reports, setReports] = useState<any[]>([]);
@@ -125,25 +127,34 @@ export default function AdminPanel({ courses, userEmail, onSelectCourse, onSelec
   const [usersSearchQuery, setUsersSearchQuery] = useState('');
 
   useEffect(() => {
-    const unsub = onSnapshot(doc(db, 'settings', 'moderation'), (snapshot) => {
+    let unsub: (() => void) | null = null;
+    let unsubAutopilot: (() => void) | null = null;
+
+    unsub = onSnapshot(doc(db, 'settings', 'moderation'), (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data();
         setModerationMode(data.mode || 'approve_queue');
         setFlagThreshold(data.flagThreshold !== undefined ? data.flagThreshold : 5);
       }
+    }, (err) => {
+      console.warn("Moderation settings listener permission warning:", err.message);
+      if (unsub) { unsub(); unsub = null; }
     });
 
-    const unsubAutopilot = onSnapshot(doc(db, 'settings', 'autopilot'), (snapshot) => {
+    unsubAutopilot = onSnapshot(doc(db, 'settings', 'autopilot'), (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data();
         setIsAutopilotActive(data.active !== undefined ? data.active : true);
         setAutopilotThreshold(data.threshold !== undefined ? data.threshold : 85);
       }
+    }, (err) => {
+      console.warn("Autopilot settings listener permission warning:", err.message);
+      if (unsubAutopilot) { unsubAutopilot(); unsubAutopilot = null; }
     });
 
     return () => {
-      unsub();
-      unsubAutopilot();
+      if (unsub) unsub();
+      if (unsubAutopilot) unsubAutopilot();
     };
   }, []);
 
@@ -488,70 +499,104 @@ export default function AdminPanel({ courses, userEmail, onSelectCourse, onSelec
   };
 
   useEffect(() => {
+    let unsubSubjects: (() => void) | null = null;
+    let unsubSubmissions: (() => void) | null = null;
+    let unsubMaterials: (() => void) | null = null;
+    let unsubAiLogs: (() => void) | null = null;
+    let unsubUsers: (() => void) | null = null;
+    let unsubBehavior: (() => void) | null = null;
+    let unsubReports: (() => void) | null = null;
+    let unsubBetaRequests: (() => void) | null = null;
+
     // Fetch all subjects for administration dropdowns
-    const unsubSubjects = onSnapshot(collection(db, 'subjects'), (snapshot) => {
+    unsubSubjects = onSnapshot(collection(db, 'subjects'), (snapshot) => {
       const subs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Subject));
       setAllSubjects(subs);
+    }, (err) => {
+      console.warn("Subjects onSnapshot warning:", err.message);
+      if (unsubSubjects) { unsubSubjects(); unsubSubjects = null; }
     });
 
     // Fetch submissions
-    const unsubSubmissions = onSnapshot(collection(db, 'submissions'), (snapshot) => {
+    unsubSubmissions = onSnapshot(collection(db, 'submissions'), (snapshot) => {
       const subs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setPendingSubmissions(subs);
+    }, (err) => {
+      console.warn("Submissions onSnapshot warning:", err.message);
+      if (unsubSubmissions) { unsubSubmissions(); unsubSubmissions = null; }
     });
 
     // Fetch materials total length and list
-    const unsubMaterials = onSnapshot(collection(db, 'materials'), (snapshot) => {
+    unsubMaterials = onSnapshot(collection(db, 'materials'), (snapshot) => {
       setAllMaterialsCount(snapshot.size);
       const mats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setAllMaterialsList(mats);
+    }, (err) => {
+      console.warn("Materials onSnapshot warning:", err.message);
+      if (unsubMaterials) { unsubMaterials(); unsubMaterials = null; }
     });
 
     // Fetch autonomic logs
-    const unsubAiLogs = onSnapshot(collection(db, 'ai_automation_logs'), (snapshot) => {
+    unsubAiLogs = onSnapshot(collection(db, 'ai_automation_logs'), (snapshot) => {
       const parsed = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       parsed.sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
       setAutopilotLogs(parsed);
+    }, (err) => {
+      console.warn("AiLogs onSnapshot warning:", err.message);
+      if (unsubAiLogs) { unsubAiLogs(); unsubAiLogs = null; }
     });
 
     // Fetch all user registered profiles
-    const unsubUsers = onSnapshot(collection(db, 'users'), (snapshot) => {
+    unsubUsers = onSnapshot(collection(db, 'users'), (snapshot) => {
       const uList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setUsersList(uList);
+    }, (err) => {
+      console.warn("Users list onSnapshot warning:", err.message);
+      if (unsubUsers) { unsubUsers(); unsubUsers = null; }
     });
 
     // Fetch student active interactive behavior patterns telemetry
-    const unsubBehavior = onSnapshot(collection(db, 'user_behavior_logs'), (snapshot) => {
+    unsubBehavior = onSnapshot(collection(db, 'user_behavior_logs'), (snapshot) => {
       const logs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       logs.sort((a: any, b: any) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime());
       setBehaviorLogs(logs);
+    }, (err) => {
+      console.warn("Behavior onSnapshot warning:", err.message);
+      if (unsubBehavior) { unsubBehavior(); unsubBehavior = null; }
     });
 
     // Fetch user reported loading issue diaries
-    const unsubReports = onSnapshot(collection(db, 'reports'), (snapshot) => {
+    unsubReports = onSnapshot(collection(db, 'reports'), (snapshot) => {
       const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       docs.sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
       setReports(docs);
+    }, (err) => {
+      console.warn("Reports onSnapshot warning:", err.message);
+      if (unsubReports) { unsubReports(); unsubReports = null; }
     });
 
     // Fetch beta requests
     setBetaRequestsLoading(true);
-    const unsubBetaRequests = onSnapshot(collection(db, 'beta_requests'), (snapshot) => {
+    unsubBetaRequests = onSnapshot(collection(db, 'beta_requests'), (snapshot) => {
       const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       docs.sort((a: any, b: any) => new Date(b.submittedAt || 0).getTime() - new Date(a.submittedAt || 0).getTime());
       setBetaRequests(docs);
       setBetaRequestsLoading(false);
+    }, (err) => {
+      console.warn("BetaRequests onSnapshot warning:", err.message);
+      setBetaRequestsLoading(false);
+      if (unsubBetaRequests) { unsubBetaRequests(); unsubBetaRequests = null; }
     });
 
     return () => {
-      unsubSubjects();
-      unsubSubmissions();
-      unsubMaterials();
-      unsubAiLogs();
-      unsubUsers();
-      unsubBehavior();
-      unsubReports();
-      unsubBetaRequests();
+      if (unsubSubjects) unsubSubjects();
+      if (unsubSubmissions) unsubSubmissions();
+      if (unsubMaterials) unsubMaterials();
+      if (unsubAiLogs) unsubAiLogs();
+      if (unsubUsers) unsubUsers();
+      if (unsubBehavior) unsubBehavior();
+      if (unsubReports) unsubReports();
+      if (unsubBetaRequests) unsubBetaRequests();
     };
   }, []);
 
@@ -1815,6 +1860,14 @@ export default function AdminPanel({ courses, userEmail, onSelectCourse, onSelec
               {betaRequests.filter((r: any) => r.status === 'PENDING').length}
             </span>
           )}
+        </button>
+        <button
+          onClick={() => setActiveAdminSubTab('announcements')}
+          className={`py-3 px-4 shrink-0 text-[9.5px] font-extrabold uppercase tracking-widest transition-all rounded-lg hover:bg-slate-100 relative text-center flex items-center justify-center gap-1.5 ${
+            activeAdminSubTab === 'announcements' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-950'
+          } sm:flex-1`}
+        >
+          Announcements
         </button>
       </div>
 
@@ -4467,7 +4520,8 @@ export default function AdminPanel({ courses, userEmail, onSelectCourse, onSelec
             return true;
           });
 
-          const handleResolveReport = async (reportId: string) => {
+          const handleResolveReport = async (report: any) => {
+            const reportId = report.id;
             setResolvingReportsRecord(prev => ({ ...prev, [reportId]: true }));
             try {
               const notes = reportAdminNotes[reportId] || '';
@@ -4478,6 +4532,29 @@ export default function AdminPanel({ courses, userEmail, onSelectCourse, onSelec
                   adminNotes: notes.trim(),
                   resolvedAt: new Date().toISOString()
                 });
+                
+                // Add notification
+                if (report.reportedByEmail && report.reportedByEmail !== 'anonymous') {
+                  const notifPath = 'notifications';
+                  await addDoc(collection(db, notifPath), {
+                    targetEmail: report.reportedByEmail,
+                    message: `Issue resolved: ${report.reportedPage} ${report.materialTitle ? `(${report.materialTitle})` : ''}`,
+                    notes: notes.trim(),
+                    url: report.targetUrl || '',
+                    isRead: false,
+                    createdAt: new Date().toISOString()
+                  });
+                } else if (report.deviceId) {
+                  const notifPath = 'notifications';
+                  await addDoc(collection(db, notifPath), {
+                    targetDeviceId: report.deviceId,
+                    message: `Issue resolved: ${report.reportedPage} ${report.materialTitle ? `(${report.materialTitle})` : ''}`,
+                    notes: notes.trim(),
+                    url: report.targetUrl || '',
+                    isRead: false,
+                    createdAt: new Date().toISOString()
+                  });
+                }
               } catch (err) {
                 handleFirestoreError(err, OperationType.UPDATE, pathForWrite);
               }
@@ -4621,7 +4698,7 @@ export default function AdminPanel({ courses, userEmail, onSelectCourse, onSelec
                         <div className="flex gap-2">
                           {report.status !== 'RESOLVED' ? (
                             <button
-                              onClick={() => handleResolveReport(report.id)}
+                              onClick={() => handleResolveReport(report)}
                               disabled={resolvingReportsRecord[report.id]}
                               className="flex-1 py-2.5 bg-slate-950 hover:bg-slate-900 disabled:opacity-40 text-white font-black text-[9px] uppercase tracking-widest rounded transition-colors text-center cursor-pointer"
                             >
@@ -4629,7 +4706,7 @@ export default function AdminPanel({ courses, userEmail, onSelectCourse, onSelec
                             </button>
                           ) : (
                             <button
-                              onClick={() => handleResolveReport(report.id)}
+                              onClick={() => handleResolveReport(report)}
                               disabled={resolvingReportsRecord[report.id]}
                               className="flex-1 py-2.5 border border-slate-350 bg-white text-slate-800 hover:bg-slate-50 disabled:opacity-40 font-black text-[9px] uppercase tracking-widest rounded transition-colors text-center cursor-pointer"
                             >
@@ -4730,7 +4807,150 @@ export default function AdminPanel({ courses, userEmail, onSelectCourse, onSelec
               </div>
             )}
           </div>
+        )}        {/* ANNOUNCEMENTS TAB */}
+        {activeAdminSubTab === 'announcements' && (
+          <AnnouncementsTabSection />
         )}
+      </div>
+    </div>
+  );
+}
+
+function AnnouncementsTabSection() {
+  const [announceTarget, setAnnounceTarget] = useState('ALL');
+  const [announceEmail, setAnnounceEmail] = useState('');
+  const [announceType, setAnnounceType] = useState('popup'); // 'popup' or 'toast'
+  const [announceMessage, setAnnounceMessage] = useState('');
+  const [announceNotes, setAnnounceNotes] = useState('');
+  const [announceUrl, setAnnounceUrl] = useState('');
+  const [isPushing, setIsPushing] = useState(false);
+
+  const handlePush = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!announceMessage) return;
+    setIsPushing(true);
+    try {
+      const target = announceTarget === 'SPECIFIC' ? announceEmail : 'ALL';
+      await addDoc(collection(db, 'notifications'), {
+        targetEmail: target,
+        mode: announceType,
+        message: announceMessage.trim(),
+        notes: announceNotes.trim(),
+        url: announceUrl.trim(),
+        isRead: false,
+        createdAt: new Date().toISOString()
+      });
+      alert('Notification pushed to ' + target);
+      setAnnounceMessage('');
+      setAnnounceNotes('');
+      setAnnounceUrl('');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to push: ' + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setIsPushing(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white border border-slate-200 rounded-xl p-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+        <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+          <Megaphone size={20} className="text-slate-800" />
+          Live Platform Announcements
+        </h2>
+        <p className="text-sm text-slate-500 mt-1 mb-6 max-w-2xl">
+          Broadcast live alerts, notifications, or toasts to all active users or target specific registered accounts. Updates appear instantly.
+        </p>
+
+        <form onSubmit={handlePush} className="w-full max-w-2xl space-y-5 bg-slate-50 border border-slate-150 p-6 rounded-xl">
+          <div className="space-y-4 text-left">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black uppercase text-slate-500 tracking-wider">Target Audience</label>
+                <select 
+                  value={announceTarget}
+                  onChange={(e) => setAnnounceTarget(e.target.value)}
+                  className="w-full bg-white border border-slate-200 focus:border-slate-800 px-3 py-2 text-xs font-bold text-slate-700 rounded outline-none"
+                >
+                  <option value="ALL">All Active Users (Global Broadcast)</option>
+                  <option value="SPECIFIC">Specific Registered User</option>
+                </select>
+              </div>
+
+              {announceTarget === 'SPECIFIC' && (
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-wider">Target Email</label>
+                  <input 
+                    type="email"
+                    required
+                    value={announceEmail}
+                    onChange={(e) => setAnnounceEmail(e.target.value)}
+                    placeholder="user@example.com"
+                    className="w-full bg-white border border-slate-200 focus:border-slate-800 px-3 py-2 text-xs font-medium text-slate-700 rounded outline-none"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase text-slate-500 tracking-wider">Notification Type</label>
+              <select 
+                value={announceType}
+                onChange={(e) => setAnnounceType(e.target.value)}
+                className="w-full bg-white border border-slate-200 focus:border-slate-800 px-3 py-2 text-xs font-bold text-slate-700 rounded outline-none"
+              >
+                <option value="popup">Immersive Modal Popup (High Priority)</option>
+                <option value="toast">Floating Toast (Standard Update)</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase text-slate-500 tracking-wider">Broadcast Headline</label>
+              <input 
+                type="text"
+                required
+                value={announceMessage}
+                onChange={(e) => setAnnounceMessage(e.target.value)}
+                placeholder="e.g., Scheduled Maintenance / Material Released"
+                className="w-full bg-white border border-slate-200 focus:border-slate-800 px-3 py-2.5 text-sm font-bold text-slate-900 rounded outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase text-slate-500 tracking-wider">Descriptive Subtext (Optional)</label>
+              <textarea 
+                value={announceNotes}
+                onChange={(e) => setAnnounceNotes(e.target.value)}
+                placeholder="Provide details about the announcement..."
+                className="w-full bg-white border border-slate-200 focus:border-slate-800 px-3 py-2 text-xs text-slate-700 rounded outline-none h-20"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black uppercase text-slate-500 tracking-wider">Action Link URL (Optional)</label>
+              <input 
+                type="url"
+                value={announceUrl}
+                onChange={(e) => setAnnounceUrl(e.target.value)}
+                placeholder="https://..."
+                className="w-full bg-white border border-slate-200 focus:border-slate-800 px-3 py-2 text-xs text-slate-600 font-mono rounded outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-slate-200 flex justify-end">
+            <button
+              type="submit"
+              disabled={isPushing}
+              className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-black text-[10px] uppercase tracking-widest rounded-lg transition-colors flex items-center gap-2"
+            >
+              <Send size={14} className={isPushing ? "opacity-50" : ""} />
+              {isPushing ? "Broadcasting..." : "Push Notification Live"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

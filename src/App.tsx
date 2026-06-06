@@ -8,6 +8,7 @@ import {
   BookOpen, 
   Search, 
   PlusCircle, 
+  Bell,
   Video, 
   FileText, 
   Link as LinkIcon, 
@@ -66,10 +67,13 @@ import {
   RefreshCw,
   Cpu,
   HardDrive,
-  Binary
+  Binary,
+  Megaphone,
+  Send
 } from 'lucide-react';
 
 import ProfilePage from './components/ProfilePage';
+import NotificationsPage from './components/NotificationsPage';
 import HealthPage from './components/HealthPage';
 import AIFeatures from './components/AIFeatures';
 import OnboardingModal from './components/OnboardingModal';
@@ -354,6 +358,7 @@ const OfficialRepositoryBrowser = () => {
 
         const res = await fetch(endpoint);
         const data = await res.json();
+        console.log("FETCH", source, endpoint, data);
         if (data.links) setItems(data.links);
       } catch (e) {
         console.error(e);
@@ -926,7 +931,7 @@ const RatingButtons = ({ material, user }: { material: Material, user: FirebaseU
       } else {
         setUserVote(null);
       }
-    });
+    }, (err) => console.warn("Vote listener warning:", err));
     return () => unsub();
   }, [material.id, voterId]);
 
@@ -2617,7 +2622,8 @@ const Navbar = ({
   setActiveTab, 
   searchQuery, 
   setSearchQuery,
-  isAdminAuthenticated
+  isAdminAuthenticated,
+  notifications = []
 }: { 
   user: FirebaseUser | null, 
   onLogin?: () => void, 
@@ -2626,7 +2632,8 @@ const Navbar = ({
   setActiveTab: (t: string) => void, 
   searchQuery: string, 
   setSearchQuery: (q: string) => void,
-  isAdminAuthenticated?: boolean
+  isAdminAuthenticated?: boolean,
+  notifications?: any[]
 }) => {
   const [showHeader, setShowHeader] = useState(true);
   const lastScrollYRef = React.useRef(0);
@@ -2638,6 +2645,7 @@ const Navbar = ({
     { id: 'labs', label: 'Labs', icon: Binary },
     { id: 'plans', label: 'About', icon: Info },
     { id: 'contribute', label: 'Share', icon: PlusCircle },
+    { id: 'notifications', label: 'Updates', icon: Bell },
     { id: 'health', label: 'Health', icon: Activity },
     ...(user ? [{ id: 'profile', label: 'Profile', icon: User }] : []),
   ];
@@ -2730,7 +2738,14 @@ const Navbar = ({
                     activeTab === tab.id ? 'text-emerald-600' : 'text-slate-400 hover:text-slate-900'
                   }`}
                 >
-                  {tab.label}
+                  <span className="relative flex items-center">
+                    {tab.label}
+                    {tab.id === 'notifications' && notifications && notifications.length > 0 && (
+                      <span className="ml-1 px-1.5 py-0.5 bg-emerald-600 text-[8px] font-black leading-none text-white rounded-full min-w-[14px] h-[14px] flex items-center justify-center">
+                        {notifications.length}
+                      </span>
+                    )}
+                  </span>
                   {activeTab === tab.id && (
                     <motion.div 
                       layoutId="active-nav-underline"
@@ -2857,14 +2872,21 @@ const Navbar = ({
                       setActiveTab(tab.id);
                       setIsMobileMenuOpen(false);
                     }}
-                    className={`flex items-center gap-4 text-xs font-bold uppercase tracking-[0.1em] transition-all p-3.5 rounded-apple border min-h-[44px] ${
+                    className={`flex items-center justify-between text-xs font-bold uppercase tracking-[0.1em] transition-all p-3.5 rounded-apple border min-h-[44px] ${
                       isActive 
                         ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' 
                         : 'bg-white text-slate-600 border-slate-100 hover:bg-slate-50'
                     }`}
                   >
-                    <tab.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
-                    {tab.label}
+                    <div className="flex items-center gap-4">
+                      <tab.icon size={18} strokeWidth={isActive ? 2.5 : 2} />
+                      <span>{tab.label}</span>
+                    </div>
+                    {tab.id === 'notifications' && notifications && notifications.length > 0 && (
+                      <span className={`px-2 py-0.5 text-[9px] font-black rounded-full ${isActive ? 'bg-white text-emerald-600' : 'bg-emerald-600 text-white'}`}>
+                        {notifications.length}
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -2968,6 +2990,7 @@ const Navbar = ({
 export default function App() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [checkingProfile, setCheckingProfile] = useState(false);
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
   const [googleAccessToken, setGoogleAccessToken] = useState<string | null>(null);
@@ -3363,11 +3386,78 @@ export default function App() {
       console.error("Error fetching user submissions:", error);
       setUserSubmissionsLoading(false);
     });
+
     return () => unsub();
   }, [user]);
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, 'courses'), (snapshot) => {
+    let unsubs: (() => void)[] = [];
+    const pushNotificationFromSnapshot = (mode: string) => (snapshot: any) => {
+       const data = snapshot.docs.map((doc: any) => ({ id: doc.id, _mode: mode, ...doc.data() }));
+       setNotifications(prev => {
+         const others = prev.filter(p => p._mode !== mode);
+         return [...others, ...data].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+       });
+    };
+
+    if (user && user.email) {
+      const qEmail = query(
+        collection(db, 'notifications'),
+        where('targetEmail', '==', user.email),
+        where('isRead', '==', false)
+      );
+      let unsubEmail: (() => void) | null = null;
+      unsubEmail = onSnapshot(qEmail, pushNotificationFromSnapshot('email'), (err) => {
+        console.warn("Email notifications subscription warn:", err.message);
+        if (unsubEmail) unsubEmail();
+      });
+      unsubs.push(() => { if (unsubEmail) unsubEmail(); });
+    }
+
+    const deviceId = localStorage.getItem('deviceId');
+    if (deviceId) {
+      const qDevice = query(
+        collection(db, 'notifications'),
+        where('targetDeviceId', '==', deviceId),
+        where('isRead', '==', false)
+      );
+      let unsubDevice: (() => void) | null = null;
+      unsubDevice = onSnapshot(qDevice, pushNotificationFromSnapshot('device'), (err) => {
+        console.warn("Device notifications subscription warn:", err.message);
+        if (unsubDevice) unsubDevice();
+      });
+      unsubs.push(() => { if (unsubDevice) unsubDevice(); });
+    }
+    
+    // Global notifications
+    const qGlobal = query(
+      collection(db, 'notifications'),
+      where('targetEmail', '==', 'ALL')
+    );
+    let unsubGlobal: (() => void) | null = null;
+    unsubGlobal = onSnapshot(qGlobal, (snapshot: any) => {
+       const hidden = JSON.parse(localStorage.getItem('hiddenGlobalNotifs') || '[]');
+       const data = snapshot.docs
+         .map((doc: any) => ({ id: doc.id, _mode: 'global', ...doc.data() }))
+         .filter((doc: any) => !hidden.includes(doc.id));
+       setNotifications(prev => {
+         const others = prev.filter((p: any) => p._mode !== 'global');
+         return [...others, ...data].sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+       });
+    }, (err) => {
+      console.warn("Global notifications subscription warn:", err.message);
+      if (unsubGlobal) unsubGlobal();
+    });
+    unsubs.push(() => { if (unsubGlobal) unsubGlobal(); });
+
+    return () => {
+      unsubs.forEach(u => u());
+    };
+  }, [user]);
+
+  useEffect(() => {
+    let unsub: (() => void) | null = null;
+    unsub = onSnapshot(collection(db, 'courses'), (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Course));
       setCourses(data);
       setLoading(false);
@@ -3424,9 +3514,57 @@ export default function App() {
       } else {
         setFirestoreConnectionError(error.message);
       }
+      if (unsub) { unsub(); unsub = null; }
     });
-    return () => unsub();
+    return () => { if (unsub) unsub(); };
   }, [loading]);
+
+  const handleAcknowledgeNotification = async (notif: any) => {
+    if (notif._mode === 'global') {
+      const hidden = JSON.parse(localStorage.getItem('hiddenGlobalNotifs') || '[]');
+      hidden.push(notif.id);
+      localStorage.setItem('hiddenGlobalNotifs', JSON.stringify(hidden));
+      setNotifications(prev => prev.filter(n => n.id !== notif.id));
+    } else {
+      try {
+        const { doc, updateDoc } = await import('firebase/firestore');
+        await updateDoc(doc(db, 'notifications', notif.id), { isRead: true });
+        setNotifications(prev => prev.filter(n => n.id !== notif.id));
+      } catch (err) {
+        console.warn("Acknowledge notification warning:", err);
+      }
+    }
+  };
+
+  const handleAcknowledgeAllNotifications = async () => {
+    try {
+      const { doc, writeBatch } = await import('firebase/firestore');
+      const batch = writeBatch(db);
+      let globalHiddenUpdated = false;
+      const hidden = JSON.parse(localStorage.getItem('hiddenGlobalNotifs') || '[]');
+
+      notifications.forEach(notif => {
+        if (notif._mode === 'global') {
+          hidden.push(notif.id);
+          globalHiddenUpdated = true;
+        } else {
+          batch.update(doc(db, 'notifications', notif.id), { isRead: true });
+        }
+      });
+
+      if (globalHiddenUpdated) {
+        localStorage.setItem('hiddenGlobalNotifs', JSON.stringify(hidden));
+      }
+      
+      const directNotes = notifications.filter(n => n._mode !== 'global');
+      if (directNotes.length > 0) {
+        await batch.commit();
+      }
+      setNotifications([]);
+    } catch (err) {
+      console.warn("Acknowledge all notifications warning:", err);
+    }
+  };
 
   const handleLogin = async () => {
     setLoginError(null);
@@ -3960,6 +4098,7 @@ export default function App() {
         searchQuery={globalSearchQuery}
         setSearchQuery={setGlobalSearchQuery}
         isAdminAuthenticated={isAdminAuthenticated}
+        notifications={notifications}
       />
 
       <main className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 pt-20 md:pt-36 pb-28 lg:pb-32">
@@ -6027,6 +6166,22 @@ export default function App() {
             </motion.div>
           )}
 
+          {activeTab === 'notifications' && (
+            <motion.div
+              key="notifications"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="w-full pb-24"
+            >
+              <NotificationsPage
+                user={user}
+                notifications={notifications}
+                onAcknowledge={handleAcknowledgeNotification}
+                onAcknowledgeAll={handleAcknowledgeAllNotifications}
+              />
+            </motion.div>
+          )}
+
           {activeTab === 'admin' && (() => {
             const isUserAdminByEmail = user?.email === 'pk950364@gmail.com';
             const hasAdminAccess = isAdminAuthenticated || isUserAdminByEmail;
@@ -6486,6 +6641,128 @@ export default function App() {
             </motion.div>
           );
         })()}
+      </AnimatePresence>
+
+      {/* Notifications Toast */}
+      {notifications.filter(n => n.mode !== 'popup').length > 0 && (
+        <div className="fixed bottom-24 right-6 z-[100] flex flex-col gap-3 max-h-[80vh] overflow-y-auto pointer-events-auto">
+          {notifications.filter(n => n.mode !== 'popup').map(notif => (
+            <motion.div
+              key={notif.id}
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              className="w-[320px] bg-slate-900 border border-slate-700 shadow-2xl rounded-apple-lg p-5 flex flex-col gap-3 relative"
+            >
+              <div className="flex gap-3">
+                <div className="shrink-0 pt-0.5">
+                  <div className="w-8 h-8 rounded-full bg-emerald-600/20 text-emerald-400 flex flex-col items-center justify-center">
+                    <CheckCircle2 size={16} />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-[11px] font-black uppercase tracking-wider text-white">Status Update</h4>
+                  <p className="text-xs font-semibold text-slate-300 mt-1.5 leading-relaxed">{notif.message}</p>
+                </div>
+              </div>
+              
+              {notif.notes && (
+                <div className="bg-slate-800 border border-slate-700/50 p-2.5 rounded-md mt-1">
+                  <p className="text-[10px] font-bold text-slate-400 capitalize tracking-wide">{notif.notes}</p>
+                </div>
+              )}
+
+              <div className="flex gap-2 mt-2 pt-2 border-t border-slate-700">
+                {notif.url && (
+                  <a
+                    href={notif.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-[9px] uppercase tracking-widest text-center rounded transition-colors"
+                  >
+                    View Link
+                  </a>
+                )}
+                <button
+                  onClick={async () => {
+                    if (notif.targetEmail === 'ALL') {
+                      const hidden = JSON.parse(localStorage.getItem('hiddenGlobalNotifs') || '[]');
+                      hidden.push(notif.id);
+                      localStorage.setItem('hiddenGlobalNotifs', JSON.stringify(hidden));
+                      setNotifications(prev => prev.filter(n => n.id !== notif.id));
+                    } else {
+                      import('firebase/firestore').then(({ doc, updateDoc }) => {
+                        updateDoc(doc(db, 'notifications', notif.id), { isRead: true });
+                      });
+                    }
+                  }}
+                  className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-black text-[9px] uppercase tracking-widest text-center rounded transition-colors"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {/* Global Immersive Popup Notifications */}
+      <AnimatePresence>
+        {notifications.filter(n => n.mode === 'popup').map(notif => (
+          <div key={`popup-${notif.id}`} className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm pointer-events-auto">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-md bg-white border border-slate-200 shadow-2xl rounded-2xl overflow-hidden"
+            >
+              <div className="bg-slate-900 border-b border-slate-800 p-6 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                  <Megaphone size={20} />
+                </div>
+                <div>
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Important Update</h3>
+                  <p className="text-sm font-bold text-white mt-0.5">{notif.message}</p>
+                </div>
+              </div>
+              
+              <div className="p-6 space-y-5 flex flex-col items-center">
+                {notif.notes && (
+                  <p className="text-sm text-slate-600 font-medium leading-relaxed text-center">{notif.notes}</p>
+                )}
+                
+                <div className="flex gap-3 w-full">
+                  <button
+                    onClick={() => {
+                      if (notif.targetEmail === 'ALL') {
+                        const hidden = JSON.parse(localStorage.getItem('hiddenGlobalNotifs') || '[]');
+                        hidden.push(notif.id);
+                        localStorage.setItem('hiddenGlobalNotifs', JSON.stringify(hidden));
+                        setNotifications(prev => prev.filter(n => n.id !== notif.id));
+                      } else {
+                        import('firebase/firestore').then(({ doc, updateDoc }) => {
+                          updateDoc(doc(db, 'notifications', notif.id), { isRead: true });
+                        });
+                      }
+                    }}
+                    className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-[10px] uppercase tracking-widest rounded-lg transition-colors border border-slate-200"
+                  >
+                    Acknowledge
+                  </button>
+                  {notif.url && (
+                    <a
+                      href={notif.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 py-3 bg-slate-900 hover:bg-emerald-600 text-white font-black text-[10px] uppercase tracking-widest rounded-lg transition-colors flex items-center justify-center cursor-pointer text-center"
+                    >
+                      View Details
+                    </a>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        ))}
       </AnimatePresence>
 
       {/* Global Floating Report action */}

@@ -28,11 +28,11 @@ service cloud.firestore {
     }
 
     function isEmailVerified() {
-      return isSignedIn() && (request.auth.token.email_verified == true);
+      return isSignedIn() && (request.auth.token.email != null);
     }
 
     function isAdmin() {
-      return isSignedIn() && request.auth.token.email_verified == true && request.auth.token.email == 'pk950364@gmail.com';
+      return isSignedIn() && request.auth.token.email == 'pk950364@gmail.com';
     }
 
     // ----------------------------------------------------
@@ -248,6 +248,20 @@ service cloud.firestore {
       allow read: if isAdmin() || (isSignedIn() && resource.data.email == request.auth.token.email);
       allow create: if isValidBetaRequest(incoming());
       allow update, delete: if isAdmin();
+    }
+
+    // 10. Settings Configuration
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 11. Custom Notifications
+    match /notifications/{notificationId} {
+      allow read: if true; 
+      allow create: if isAdmin();
+      allow update: if (isSignedIn() && resource.data.targetEmail == request.auth.token.email) || (resource.data.targetDeviceId != null);
+      allow delete: if isAdmin();
     }
   }
 }
