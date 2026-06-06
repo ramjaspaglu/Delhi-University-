@@ -1,0 +1,253 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ----------------------------------------------------
+    // GLOBAL SAFETY NET - DEFAULT DENY CATCH ALL
+    // ----------------------------------------------------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ----------------------------------------------------
+    // PHASE 3: PRIMITIVE DEFINITIONS & HEALTH CHECK HELPERS
+    // ----------------------------------------------------
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && (request.auth.token.email_verified == true);
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email_verified == true && request.auth.token.email == 'pk950364@gmail.com';
+    }
+
+    // ----------------------------------------------------
+    // PHASE 4: STANDALONE ENTITY VALIDATIONS (THE "ANTI-UPDATE-GAP")
+    // ----------------------------------------------------
+    function isValidCourse(data) {
+      return data.keys().hasAll(['name', 'level', 'nepBased']) &&
+             (data.keys().size() == 3 || (data.keys().size() == 4 && data.keys().hasAll(['description']))) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 200 &&
+             data.level in ['UG', 'PG'] &&
+             data.nepBased is bool &&
+             (!data.keys().hasAll(['description']) || (data.description is string && data.description.size() <= 1000));
+    }
+
+    function isValidSubject(data) {
+      return data.keys().hasAll(['courseId', 'semester', 'name']) &&
+             isValidId(data.courseId) &&
+             data.semester is int && data.semester >= 1 && data.semester <= 8 &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 200 &&
+             (!data.keys().hasAll(['code']) || (data.code is string && data.code.size() <= 50)) &&
+             (!data.keys().hasAll(['description']) || (data.description is string && data.description.size() <= 1000));
+    }
+
+    function isValidMaterial(data) {
+      return data.keys().hasAll(['subjectId', 'title', 'url', 'type']) &&
+             isValidId(data.subjectId) &&
+             data.title is string && data.title.size() > 0 && data.title.size() <= 300 &&
+             data.url is string && data.url.size() > 0 && data.url.size() <= 2000 &&
+             data.type in ['PDF', 'VIDEO', 'LINK', 'NOTES'] &&
+             (!data.keys().hasAll(['isApproved']) || data.isApproved is bool) &&
+             (!data.keys().hasAll(['upvotes']) || data.upvotes is int) &&
+             (!data.keys().hasAll(['downvotes']) || data.downvotes is int) &&
+             (!data.keys().hasAll(['flags']) || data.flags is int) &&
+             (!data.keys().hasAll(['submittedBy']) || (data.submittedBy is string && data.submittedBy.size() <= 200)) &&
+             (!data.keys().hasAll(['createdAt']) || (data.createdAt is string && data.createdAt.size() <= 100)) &&
+             (!data.keys().hasAll(['author']) || (data.author is string && data.author.size() <= 200)) &&
+             (!data.keys().hasAll(['tags']) || (data.tags is list && data.tags.size() <= 10 && (data.tags.size() == 0 || data.tags[0] is string)));
+    }
+
+    function isValidVote(data, userId) {
+      return data.keys().hasAll(['userId', 'type']) &&
+             data.userId == userId &&
+             data.type in ['UP', 'DOWN'] &&
+             (!data.keys().hasAll(['timestamp']) || (data.timestamp is string && data.timestamp.size() <= 100));
+    }
+
+    function isValidSubmission(data) {
+      return data.keys().hasAll(['submissionType', 'courseName', 'subjectName', 'status', 'semester']) &&
+             data.submissionType in ['MATERIAL', 'SUBJECT_PROPOSAL'] &&
+             data.courseName is string && data.courseName.size() <= 200 &&
+             data.subjectName is string && data.subjectName.size() <= 200 &&
+             data.semester is int && data.semester >= 1 && data.semester <= 8 &&
+             data.status in ['PENDING', 'APPROVED', 'REJECTED', 'PUBLISHED'] &&
+             (!data.keys().hasAll(['submittedByEmail']) || (data.submittedByEmail is string && data.submittedByEmail.size() <= 200)) &&
+             (!data.keys().hasAll(['description']) || (data.description is string && data.description.size() <= 1000)) &&
+             (!data.keys().hasAll(['title']) || (data.title is string && data.title.size() <= 300)) &&
+             (!data.keys().hasAll(['url']) || (data.url is string && data.url.size() <= 2000)) &&
+             (!data.keys().hasAll(['type']) || (data.type in ['PDF', 'VIDEO', 'LINK', 'NOTES'])) &&
+             (!data.keys().hasAll(['createdAt']) || (data.createdAt is string && data.createdAt.size() <= 100));
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['email', 'uin']) &&
+             data.email is string && data.email.size() <= 200 &&
+             data.uin is string && data.uin.startsWith('DU-') && data.uin.size() <= 200 &&
+             (!data.keys().hasAll(['fullName']) || (data.fullName is string && data.fullName.size() <= 200)) &&
+             (!data.keys().hasAll(['collegeName']) || (data.collegeName is string && data.collegeName.size() <= 200)) &&
+             (!data.keys().hasAll(['department']) || (data.department is string && data.department.size() <= 200)) &&
+             (!data.keys().hasAll(['rollNumber']) || (data.rollNumber is string && data.rollNumber.size() <= 100)) &&
+             (!data.keys().hasAll(['phoneNumber']) || (data.phoneNumber is string && data.phoneNumber.size() <= 50)) &&
+             (!data.keys().hasAll(['hasConsented']) || data.hasConsented is bool) &&
+             (!data.keys().hasAll(['skippedOnboarding']) || data.skippedOnboarding is bool) &&
+             (!data.keys().hasAll(['onboardedAt']) || (data.onboardedAt is string && data.onboardedAt.size() <= 100)) &&
+             (!data.keys().hasAll(['updatedAt']) || (data.updatedAt is string && data.updatedAt.size() <= 100));
+    }
+
+    function isValidFeatureProposal(data) {
+      return data.keys().hasAll(['title', 'description', 'subject', 'votes', 'status', 'submittedBy', 'createdAt']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+             data.description is string && data.description.size() <= 2000 &&
+             data.subject is string && data.subject.size() <= 200 &&
+             data.votes is int &&
+             data.status in ['PROPOSED', 'IN_RESEARCH', 'UNDER_CONSTRUCTION', 'COMPLETED'] &&
+             data.submittedBy is string && data.submittedBy.size() <= 200 &&
+             data.createdAt is string && data.createdAt.size() <= 100 &&
+             (!data.keys().hasAll(['milestones']) || (data.milestones is list && data.milestones.size() <= 20));
+    }
+
+    function isValidBehaviorLog(data) {
+      return data.keys().hasAll(['action', 'timestamp']) &&
+             data.action is string && data.action.size() <= 200 &&
+             data.timestamp is string && data.timestamp.size() <= 100 &&
+             (!data.keys().hasAll(['userId']) || (data.userId is string && data.userId.size() <= 128));
+    }
+
+    function isValidReport(data) {
+      return data.keys().hasAll(['reportedPage', 'status', 'userDescription', 'createdAt']) &&
+             data.reportedPage is string && data.reportedPage.size() > 0 && data.reportedPage.size() <= 200 &&
+             data.status in ['PENDING', 'RESOLVED'] &&
+             data.userDescription is string && data.userDescription.size() > 0 && data.userDescription.size() <= 2000 &&
+             data.createdAt is string && data.createdAt.size() <= 100 &&
+             (!data.keys().hasAll(['reportedByEmail']) || (data.reportedByEmail is string && data.reportedByEmail.size() <= 200)) &&
+             (!data.keys().hasAll(['targetUrl']) || (data.targetUrl is string && data.targetUrl.size() <= 2000)) &&
+             (!data.keys().hasAll(['materialTitle']) || (data.materialTitle is string && data.materialTitle.size() <= 300)) &&
+             (!data.keys().hasAll(['adminNotes']) || (data.adminNotes is string && data.adminNotes.size() <= 2000));
+    }
+
+    function isValidBetaRequest(data) {
+      return data.keys().hasAll(['email', 'submittedAt', 'status']) &&
+             data.email is string && data.email.size() > 0 && data.email.size() <= 255 &&
+             data.submittedAt is string && data.submittedAt.size() <= 100 &&
+             data.status in ['PENDING', 'APPROVED'];
+    }
+
+    // ----------------------------------------------------
+    // COLLECTION PATTERNS & THE MATCH BLOCKS
+    // ----------------------------------------------------
+    
+    // 1. Courses
+    match /courses/{courseId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin() && isValidCourse(incoming());
+    }
+
+    // 2. Subjects
+    match /subjects/{subjectId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin() && isValidSubject(incoming());
+    }
+
+    // 3. Materials & Child Votes
+    match /materials/{materialId} {
+      allow read: if true;
+      allow create: if isEmailVerified() && isValidMaterial(incoming());
+      allow update: if (
+        isAdmin() || (
+          isSignedIn() &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['upvotes', 'downvotes', 'flags']) &&
+          (!incoming().keys().hasAll(['upvotes']) || incoming().upvotes is int) &&
+          (!incoming().keys().hasAll(['downvotes']) || incoming().downvotes is int) &&
+          (!incoming().keys().hasAll(['flags']) || incoming().flags is int)
+        )
+      );
+      allow delete: if isAdmin();
+
+      // Child Votes subcollection with relational Master Gate validation
+      match /votes/{userId} {
+        allow read: if true;
+        allow write: if isSignedIn() && request.auth.uid == userId && 
+                      isValidVote(incoming(), userId) &&
+                      exists(/databases/$(database)/documents/materials/$(materialId));
+      }
+    }
+
+    // 4. Submissions
+    match /submissions/{submissionId} {
+      allow get, list: if isAdmin() || (isSignedIn() && resource.data.submittedByEmail == request.auth.token.email) || resource.data.status == 'PUBLISHED';
+      allow create: if isSignedIn() && isValidSubmission(incoming()) && 
+                    incoming().submittedByEmail == request.auth.token.email &&
+                    (incoming().status == 'PENDING' || incoming().status == 'PUBLISHED' || isAdmin());
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // 5. User Proﬁles
+    match /users/{userId} {
+      allow read: if isSignedIn() && (userId == 'DU-' + request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && userId == 'DU-' + request.auth.uid && isValidUser(incoming()) && 
+                    incoming().uin == userId &&
+                    !incoming().keys().hasAny(['role', 'isAdmin']);
+      allow update: if isAdmin() || (isSignedIn() && userId == 'DU-' + request.auth.uid && isValidUser(incoming()) && 
+                    (incoming().email == existing().email || !('email' in existing())) &&
+                    incoming().uin == userId &&
+                    !incoming().keys().hasAny(['role', 'isAdmin']));
+      allow delete: if isAdmin();
+    }
+
+    // 6. Feature Proposals
+    match /feature_proposals/{proposalId} {
+      allow read: if true;
+      allow create: if isEmailVerified() && isValidFeatureProposal(incoming()) && incoming().submittedBy == request.auth.token.email;
+      allow update: if (
+        isAdmin() || (
+          // Action: Counter increment only
+          isSignedIn() &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['votes']) &&
+          incoming().votes is int
+        )
+      );
+      allow delete: if isAdmin();
+    }
+
+    // 7. System & Behavioral Logs
+    match /ai_automation_logs/{logId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /user_behavior_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn() && isValidBehaviorLog(incoming());
+      allow update, delete: if false;
+    }
+
+    // 8. Reported Issues (Diary)
+    match /reports/{reportId} {
+      allow read: if isAdmin();
+      allow create: if isValidReport(incoming());
+      allow update, delete: if isAdmin();
+    }
+
+    // 9. DeepResearch Labs Beta signup requests
+    match /beta_requests/{requestId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.email == request.auth.token.email);
+      allow create: if isValidBetaRequest(incoming());
+      allow update, delete: if isAdmin();
+    }
+  }
+}

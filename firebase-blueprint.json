@@ -1,0 +1,191 @@
+{
+  "entities": {
+    "Course": {
+      "title": "Course",
+      "description": "Represents a degree course in Delhi University",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "e.g., B.A. (Hons.) Economics" },
+        "description": { "type": "string" },
+        "level": { "type": "string", "enum": ["UG", "PG"] },
+        "durationYears": { "type": "integer" },
+        "nepBased": { "type": "boolean" }
+      },
+      "required": ["name", "level"]
+    },
+    "Subject": {
+      "title": "Subject",
+      "description": "A specific paper or subject within a course",
+      "type": "object",
+      "properties": {
+        "courseId": { "type": "string" },
+        "semester": { "type": "integer" },
+        "name": { "type": "string" },
+        "code": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["courseId", "semester", "name"]
+    },
+    "Material": {
+      "title": "Material",
+      "description": "Study material like Notes, PYQs, Videos",
+      "type": "object",
+      "properties": {
+        "subjectId": { "type": "string" },
+        "title": { "type": "string" },
+        "url": { "type": "string" },
+        "type": { "type": "string", "enum": ["PDF", "VIDEO", "LINK", "NOTES"] },
+        "author": { "type": "string" },
+        "submittedBy": { "type": "string" },
+        "submittedAt": { "type": "string", "format": "date-time" },
+        "isApproved": { "type": "boolean" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "upvotes": { "type": "integer" },
+        "downvotes": { "type": "integer" },
+        "flags": { "type": "integer" }
+      },
+      "required": ["subjectId", "title", "url", "type"]
+    },
+    "Vote": {
+      "title": "Vote",
+      "description": "User vote on a material",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "type": { "type": "string", "enum": ["UP", "DOWN"] },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "type"]
+    },
+    "Submission": {
+      "title": "Submission",
+      "description": "User submissions for review",
+      "type": "object",
+      "properties": {
+        "submissionType": { "type": "string", "enum": ["MATERIAL", "SUBJECT_PROPOSAL"] },
+        "title": { "type": "string", "description": "Title of the material or proposal" },
+        "url": { "type": "string", "description": "Resource URL or Syllabus URL" },
+        "type": { "type": "string", "description": "PDF/Video/Link" },
+        "courseName": { "type": "string" },
+        "subjectName": { "type": "string" },
+        "semester": { "type": "integer" },
+        "submittedByEmail": { "type": "string" },
+        "status": { "type": "string", "enum": ["PENDING", "APPROVED", "REJECTED", "PUBLISHED"] },
+        "description": { "type": "string", "description": "Additional notes" }
+      },
+      "required": ["submissionType", "courseName", "subjectName", "status"]
+    },
+    "User": {
+      "title": "User",
+      "description": "Registered students profile details",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string" },
+        "email": { "type": "string" },
+        "uin": { "type": "string", "description": "Unique Identification Number starting with DU" },
+        "collegeName": { "type": "string" },
+        "department": { "type": "string" },
+        "rollNumber": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "hasConsented": { "type": "boolean" },
+        "onboardedAt": { "type": "string" }
+      },
+      "required": ["email", "uin"]
+    },
+    "FeatureProposal": {
+      "title": "FeatureProposal",
+      "description": "Community feature proposals",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "subject": { "type": "string" },
+        "votes": { "type": "integer" },
+        "status": { "type": "string", "enum": ["PROPOSED", "IN_RESEARCH", "UNDER_CONSTRUCTION", "COMPLETED"] },
+        "submittedBy": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "description", "subject", "votes", "status", "submittedBy", "createdAt"]
+    },
+    "UserBehaviorLog": {
+      "title": "UserBehaviorLog",
+      "description": "User interaction telemetry",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "action": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["action"]
+    },
+    "Report": {
+      "title": "Report",
+      "description": "Reported outdated or broken material loading issues",
+      "type": "object",
+      "properties": {
+        "reportedPage": { "type": "string" },
+        "status": { "type": "string", "enum": ["PENDING", "RESOLVED"] },
+        "userDescription": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "reportedByEmail": { "type": "string" },
+        "targetUrl": { "type": "string" },
+        "materialTitle": { "type": "string" },
+        "adminNotes": { "type": "string" }
+      },
+      "required": ["reportedPage", "status", "userDescription", "createdAt"]
+    },
+    "BetaRequest": {
+      "title": "BetaRequest",
+      "description": "Beta requested emails and status inside DeepResearch Labs",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "submittedAt": { "type": "string" },
+        "status": { "type": "string", "enum": ["PENDING", "APPROVED"] }
+      },
+      "required": ["email", "submittedAt", "status"]
+    }
+  },
+  "firestore": {
+    "/beta_requests/{requestId}": {
+      "schema": "BetaRequest",
+      "description": "DeepResearch Labs beta sign-up repository list"
+    },
+    "/reports/{reportId}": {
+      "schema": "Report",
+      "description": "Collection of user-reported issues on loading pages or broken document links"
+    },
+    "/courses/{courseId}": {
+      "schema": "Course",
+      "description": "List of all DU courses"
+    },
+    "/subjects/{subjectId}": {
+      "schema": "Subject",
+      "description": "List of all subjects mapped to courses"
+    },
+    "/materials/{materialId}": {
+      "schema": "Material",
+      "description": "Approved study materials"
+    },
+    "/materials/{materialId}/votes/{userId}": {
+      "schema": "Vote",
+      "description": "Individual member votes"
+    },
+    "/submissions/{submissionId}": {
+      "schema": "Submission",
+      "description": "User submitted materials waiting for moderation"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles containing name, college, email"
+    },
+    "/feature_proposals/{proposalId}": {
+      "schema": "FeatureProposal",
+      "description": "Community feature proposals"
+    },
+    "/user_behavior_logs/{logId}": {
+      "schema": "UserBehaviorLog",
+      "description": "Analytics data for user sessions"
+    }
+  }
+}

@@ -1,0 +1,65 @@
+# DU Study Archive - Strict Privacy & No-Crawl Standard
+# All automatic crawling, scraping, and LLM training is strictly prohibited.
+
+User-agent: *
+Disallow: /
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Googlebot
+Disallow: /
+
+User-agent: Anthropic-AI
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: YouBot
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: bytespider
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: Cohere-ai
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: ahrefsbot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: Scrapy
+Disallow: /
+
+User-agent: facebookexternalhit
+Disallow: /
+
+User-agent: MetaCrawler
+Disallow: /

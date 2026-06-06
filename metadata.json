@@ -1,0 +1,8 @@
+{
+  "name": "Remix: DU Academic Archive",
+  "description": "A comprehensive NEP-based academic archive for Delhi University students. Access course-wise materials, YouTube lectures, PDF notes, and previous year questions. Powered by community contributions and AI resource discovery.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
