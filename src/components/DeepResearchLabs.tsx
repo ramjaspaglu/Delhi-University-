@@ -36,37 +36,37 @@ export default function DeepResearchLabs({ user }: { user?: any }) {
   };
 
   return (
-    <div className="w-full bg-white text-slate-900 border border-slate-200 p-6 sm:p-10 md:p-14 relative overflow-hidden select-none rounded-[2rem] shadow-sm">
+    <div className="w-full bg-white text-slate-900 border border-slate-200 p-5 sm:p-8 md:p-14 relative overflow-hidden select-none rounded-3xl md:rounded-[3rem] shadow-sm">
       
       {/* Flat Minimalist Grid Background */}
       <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
-      <div className="relative z-10 max-w-5xl mx-auto space-y-16">
+      <div className="relative z-10 max-w-5xl mx-auto space-y-8 md:space-y-16">
         
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-slate-200 pb-10">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-50 border border-slate-200 text-slate-600 text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-8 border-b border-slate-200 pb-6 md:pb-10">
+          <div className="space-y-3 md:space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-50 border border-slate-200 text-slate-600 text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm">
               <Binary size={12} className="text-slate-400" />
               <span>CORE INFRASTRUCTURE V4</span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-sans font-black tracking-tight text-slate-950 uppercase leading-none">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-sans font-black tracking-tight text-slate-950 uppercase leading-none break-words">
               DeepResearch
-              <span className="block text-slate-400 font-light tracking-wider italic mt-1 md:mt-2">Systems</span>
+              <span className="block text-slate-400 font-light tracking-wider italic mt-1 md:mt-2 text-2xl sm:text-3xl md:text-5xl">Systems</span>
             </h1>
           </div>
           
-          <div className="text-left md:text-right space-y-1">
-            <p className="text-[10px] font-mono font-black uppercase tracking-widest text-slate-400">System Status</p>
-            <div className="flex items-center md:justify-end gap-2 text-xs font-mono font-bold uppercase tracking-wider text-emerald-600">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Building Next-Gen Architecture
+          <div className="text-left md:text-right space-y-1 mt-2 md:mt-0">
+            <p className="text-[9px] md:text-[10px] font-mono font-black uppercase tracking-widest text-slate-400">System Status</p>
+            <div className="flex items-center md:justify-end gap-2 text-[10px] md:text-xs font-mono font-bold uppercase tracking-wider text-emerald-600 break-words">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              <span>Building Next-Gen Architecture</span>
             </div>
           </div>
         </div>
 
         {/* Interactive Module Navigation */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
           {(Object.keys(modules) as Array<keyof typeof modules>).map((key) => {
             const isActive = activeTab === key;
             return (
@@ -97,7 +97,7 @@ export default function DeepResearchLabs({ user }: { user?: any }) {
         </div>
 
         {/* Active Module Display (Flat, highly legible) */}
-        <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 md:p-12 min-h-[300px]">
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl md:rounded-3xl p-5 sm:p-8 md:p-12 min-h-[350px] md:min-h-[300px]">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -105,31 +105,31 @@ export default function DeepResearchLabs({ user }: { user?: any }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="grid grid-cols-1 lg:grid-cols-2 gap-12"
+              className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12"
             >
-              <div className="space-y-6">
+              <div className="space-y-5 md:space-y-6">
                 <div className="space-y-2">
-                  <span className={`text-[10px] font-black uppercase tracking-widest font-mono ${modules[activeTab].textColor}`}>
+                  <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest font-mono ${modules[activeTab].textColor}`}>
                     TECHNICAL ABSTRACT
                   </span>
-                  <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-slate-900">
+                  <h2 className="text-xl md:text-3xl font-black uppercase tracking-tight text-slate-900 break-words">
                     {modules[activeTab].title}
                   </h2>
                 </div>
                 
-                <p className="text-sm text-slate-600 leading-relaxed font-mono uppercase tracking-wide font-medium">
+                <p className="text-xs md:text-sm text-slate-600 leading-relaxed font-mono uppercase tracking-wide font-medium">
                   {modules[activeTab].description}
                 </p>
 
-                <div className="pt-4 space-y-4">
-                  <span className="text-[10px] font-black uppercase tracking-widest font-mono text-slate-400">
+                <div className="pt-2 md:pt-4 space-y-3 md:space-y-4">
+                  <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest font-mono text-slate-400">
                     CORE CAPABILITIES
                   </span>
-                  <div className="space-y-3 font-mono text-[11px] font-bold uppercase tracking-wider text-slate-700">
+                  <div className="space-y-2 md:space-y-3 font-mono text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-slate-700">
                     {modules[activeTab].features.map((feature, idx) => (
                       <div key={idx} className="flex items-center gap-3">
-                        <div className={`w-1.5 h-1.5 rounded-full ${modules[activeTab].color}`} />
-                        {feature}
+                        <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${modules[activeTab].color}`} />
+                        <span className="break-words">{feature}</span>
                       </div>
                     ))}
                   </div>
@@ -137,25 +137,25 @@ export default function DeepResearchLabs({ user }: { user?: any }) {
               </div>
 
               {/* Data Representation Diagram (Flat blocks, NO 3D) */}
-              <div className="flex items-center justify-center bg-white border border-slate-200 rounded-2xl p-6 relative overflow-hidden shadow-inner">
+              <div className="flex items-center justify-center bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 relative overflow-hidden shadow-inner h-full min-h-[220px]">
                 <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(to right, #0f172a 1px, transparent 1px), linear-gradient(to bottom, #0f172a 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
                 
-                <div className="relative z-10 w-full flex flex-col items-center gap-4">
+                <div className="relative z-10 w-full flex flex-col items-center gap-3 md:gap-4">
                   {[1, 2, 3].map((_, i) => (
-                    <div key={i} className="w-full max-w-[240px] bg-slate-50 border border-slate-200 p-3 rounded-lg flex items-center gap-3 shadow-sm">
-                      <div className={`w-3 h-3 rounded-sm ${modules[activeTab].color} opacity-80`} />
-                      <div className="flex-1 space-y-1.5">
-                        <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                    <div key={i} className="w-full max-w-[240px] md:max-w-xs bg-slate-50 border border-slate-200 p-2.5 md:p-3 rounded-lg flex items-center gap-3 shadow-sm">
+                      <div className={`w-2.5 h-2.5 md:w-3 md:h-3 rounded-sm ${modules[activeTab].color} opacity-80 shrink-0`} />
+                      <div className="flex-1 space-y-1.5 min-w-0">
+                        <div className="h-1 md:h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
                           <div className={`h-full ${modules[activeTab].color}`} style={{ width: `${Math.max(30, Math.random() * 100)}%` }} />
                         </div>
-                        <div className="h-1.5 w-2/3 bg-slate-200 rounded-full" />
+                        <div className="h-1 md:h-1.5 w-2/3 bg-slate-200 rounded-full" />
                       </div>
                     </div>
                   ))}
                   
-                  <div className="mt-4 flex items-center gap-2 text-[9px] font-mono font-black uppercase tracking-widest text-slate-400">
+                  <div className="mt-3 md:mt-4 flex items-center gap-2 text-[8px] md:text-[9px] font-mono font-black uppercase tracking-widest text-slate-400 whitespace-nowrap">
                     <Globe2 size={12} className={modules[activeTab].textColor} />
-                    SIMULATED NODE TRAFFIC
+                    <span>SIMULATED NODE TRAFFIC</span>
                   </div>
                 </div>
               </div>
@@ -164,7 +164,7 @@ export default function DeepResearchLabs({ user }: { user?: any }) {
         </div>
 
         {/* Footer info */}
-        <div className="flex flex-col sm:flex-row items-center justify-between text-[9px] font-mono font-black uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-8 gap-4 text-center sm:text-left">
+        <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between text-[8px] md:text-[9px] font-mono font-black uppercase tracking-widest text-slate-400 border-t border-slate-200 pt-6 md:pt-8 gap-3 md:gap-4 text-center sm:text-left">
           <span>DEEPRESEARCH ARCHITECTURE LABS // PROTOTYPE SYSTEM</span>
           <span>STAGING ENVIRONMENT ACTIVE</span>
         </div>

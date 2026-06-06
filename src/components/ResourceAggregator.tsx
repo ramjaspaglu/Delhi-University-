@@ -63,6 +63,7 @@ export default function ResourceAggregator({
 }: ResourceAggregatorProps) {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
+  const [externalMaterials, setExternalMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   // Filters State
@@ -116,6 +117,32 @@ export default function ResourceAggregator({
       }
     );
 
+    // 3. Fetch external aggregated content
+    fetch('/api/aggregate-du')
+      .then(res => res.ok ? res.json() : { links: [] })
+      .then(data => {
+        if (data && data.links) {
+          const externalFormat: Material[] = data.links.map((link: any, i: number) => ({
+             id: `ext-${i}-${Math.random().toString(36).substring(2, 6)}`,
+             subjectId: 'external', 
+             title: link.cleanName || link.name || 'Untitled Source',
+             url: link.path,
+             type: (link.path.toLowerCase().endsWith('.pdf') ? 'PDF' : 'LINK'),
+             author: link.source,
+             submittedBy: link.sourceType || 'External Aggregator',
+             submittedAt: new Date().toISOString(),
+             isApproved: true,
+             tags: [link.source, 'community', link.category],
+             upvotes: 0,
+             downvotes: 0,
+             flags: 0,
+             description: `Scraped from ${link.source}`
+          }));
+          setExternalMaterials(externalFormat);
+        }
+      })
+      .catch(err => console.error("Aggregation scrape error:", err));
+
     return () => {
       unsubscribeSubjects();
       unsubscribeMaterials();
@@ -124,6 +151,7 @@ export default function ResourceAggregator({
 
   const handleUpvote = async (materialId: string, event: React.MouseEvent) => {
     event.stopPropagation();
+    if (materialId.startsWith('ext-')) return; // External links cannot be upvoted directly yet
     try {
       const docRef = doc(db, 'materials', materialId);
       await updateDoc(docRef, {
@@ -135,7 +163,7 @@ export default function ResourceAggregator({
   };
 
   // Build the list of items combined with course & subject data
-  const aggregatedData: AggregatedItem[] = materials.map((material) => {
+  const aggregatedData: AggregatedItem[] = [...materials, ...externalMaterials].map((material) => {
     const subject = subjects.find((s) => s.id === material.subjectId) || null;
     const course = subject ? (courses.find((c) => c.id === subject.courseId) || null) : null;
     return { material, subject, course };
@@ -144,7 +172,7 @@ export default function ResourceAggregator({
   // Calculate popular tags from materials
   const tagCounts = React.useMemo(() => {
     const counts: Record<string, number> = {};
-    materials.forEach((m) => {
+    [...materials, ...externalMaterials].forEach((m) => {
       if (m.tags && Array.isArray(m.tags)) {
         m.tags.forEach((tag) => {
           if (tag && typeof tag === 'string') {
