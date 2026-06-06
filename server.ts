@@ -1,6 +1,5 @@
 import express from "express";
 import path from "path";
-import { createServer as createViteServer } from "vite";
 import * as cheerio from 'cheerio';
 import { GoogleGenAI, Type } from "@google/genai";
 import multer from "multer";
@@ -242,7 +241,7 @@ let CACHED_SCRAPE: any[] | null = null;
 let LAST_SCRAPE_TIME = 0;
 
 export const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT || 3000);
 
 // Ultimate Security Shield: Anti-Crawl, Anti-Scrape, Anti-Scrawl & Anti-Exploit Middleware
 app.use((req, res, next) => {
@@ -1535,12 +1534,14 @@ Adhere strictly to this JSON schema:
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
-    createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    }).then((vite) => {
-      app.use(vite.middlewares);
-    }).catch(err => console.error("Vite setup error", err));
+    import("vite").then(({ createServer: createViteServer }) => {
+      createViteServer({
+        server: { middlewareMode: true },
+        appType: "spa",
+      }).then((vite) => {
+        app.use(vite.middlewares);
+      }).catch(err => console.error("Vite setup error", err));
+    }).catch(err => console.error("Failed to import vite", err));
   } else {
     // Only serve static files if NOT on Vercel
     if (!process.env.VERCEL) {
