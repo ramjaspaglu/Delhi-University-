@@ -1,70 +1,106 @@
-# DEEPRESEARCH LABS
+# ⌬ DEEPRESEARCH LABS
 **Cognitive Pipeline & Syllabus Topography Console**
 
-> A premium, high-fidelity platform specialized in mapping Delhi University's syllabus structures and exam indices across dynamic learning nodes.
+> A premium, high-fidelity platform specialized in mapping Delhi University's syllabus structures and exam indices across dynamic learning nodes using simulated cognitive semantic parsing.
 
 ---
 
-## SYSTEM ARCHITECTURE 
+## ✦ 1. DESIGN PHILOSOPHY & AESTHETICS
 
-DeepResearch Labs is a strictly offline-first, highly aesthetic research console featuring fully immersive 3D topological graphs to visualize real-time structured curriculum models. Built with a minimalist, high-contrast design philosophy, it removes visual clutter to focus entirely on cognitive node mapping and semantic extraction.
+DeepResearch Labs strictly adheres to a **Minimalist, High-Contrast Tech** aesthetic. It abandons visual clutter in favor of a clean, highly structured, grid-based "console" interface that feels like a professional engineering sandbox.
 
-### Core Modules
-* **3D Topological Grid (Matrix Canvas)**: An interactive, hardware-accelerated 3D Cartesian visualizer mapping "Delhi University Curriculum Clusters" and "Taxonomy Axes."
-* **Deep Scramble Crawler**: A tunable matrix console accepting custom semantic phrases (e.g., `DSC DISCRETE ALGORITHMS`) to simulate packet transmissions, relational routing paths, and deep multi-hop scans.
-* **Institutional Security Gateway**: Employs secure academic whitelist loops, throttling simulator access to verified educational network domains.
+* **Typography Pairing**: Features bold, rigid tracking using `font-sans` (Inter) for primary readouts and `font-mono` (JetBrains Mono) for numerical data, coordinates, and system statuses.
+* **Color Palette**: A subdued, eye-safe spectrum blending stark white/off-white (`slate-50`) backgrounds, deep charcoal (`slate-950`) elements, and distinct pulse-green (`emerald-500` to `emerald-800`) indicators for semantic matches.
+* **Dimensional Interactivity**: Utilizes `motion/react` to project a hardware-accelerated **Full 3D Topological Grid**. The UI respects perspective tracking, responding linearly to the X/Y axes of user mouse movements to expose a simulated Z-axis layer depth.
 
 ---
 
-## TECHNICAL SPECIFICATIONS 
+## ✦ 2. SYSTEM ARCHITECTURE & BACKEND
 
+The system is deployed as a highly performant Single Page Application (SPA), integrating cleanly with cloud infrastructure for secure, stateless persistence.
+
+### Technology Stack
 | Layer | Technology | Purpose |
-|:---|:---|:---|
-| **Core Framework** | React 18, TypeScript, Vite | High-performance SPA runtime |
-| **Physics & 3D** | Motion | 3D coordinate transformations and hardware mapping |
-| **Aesthetics** | Tailwind CSS | Strict high-contrast, minimalist UI utility architecture |
-| **Persistence** | Firebase Firestore | `beta_requests` secure tunneling and verification loops |
-| **Vector Icons** | Lucide React | Precision geometric glyphs and node representations |
+| :--- | :--- | :--- |
+| **Client Core** | React 18 / TypeScript / Vite | Declarative view management and ultra-fast build tooling. |
+| **Visual Styling** | Tailwind CSS | Utility-first styling enabling precise pixel layouts and strict grids. |
+| **Physics/Animation**| Motion | 3D coordinate transformations, spring animations, and layout transitions. |
+| **Backend & Auth** | Firebase Firestore | Cloud NoSQL database. Manages authorization queues and waitlists. |
+| **Iconography** | Lucide React | Clean, geometric vector glyphs for system representations. |
+
+### Waitlist Gateway Flow
+The backend uses Firebase Firestore to gate early access. 
+1. **User Request**: The visitor submits a University Domain Email.
+2. **Database Write**: The semantic packet is sent to the `beta_requests` collection.
+3. **Validation Polling**: The client polls Firestore to confirm if the user's logged-in identity matches an `APPROVED` state to expose the Stage 02 Matrix Canvas.
+
+**Database Schema:** `beta_requests`
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `email` | String | User's institutional email address (e.g. `name@du.ac.in`) |
+| `status` | Enum (String) | `PENDING`, `APPROVED`, `REJECTED` |
+| `createdAt`| ISO Date | Timestamp of network request |
 
 ---
 
-## CONSOLE DATA & NODE REGISTRY
+## ✦ 3. THE TOPOLOGICAL MATRIX (DATA & GRAPHS)
 
-The 3D simulator maps the following hard-coded cognitive endpoints across various bandwidth frequencies:
+At the heart of the system is the **Relational Node Matrix Canvas**. It renders localized mapping routes and structural distance ratios for academic databases.
 
-1. **SEMANTIC CORE ENGINE** (System Central) - `8.40 GHZ`
-2. **COGNITIVE BLUEPRINT UNIT** (Vector Stack) - `8.40 GHZ`
-3. **NEP COURSE INTEGRATOR** (Syllabi Parser) - `5.20 GHZ`
-4. **CONCURRENT HARVESTER** (Web Scraper) - `5.20 GHZ`
-5. **PREVIOUS YEAR BLUEPRINTS** (Decoding Node) - `2.40 GHZ`
-6. **TAXONOMY MAPPING CORNER** (Blueprint Heuristics) - `2.40 GHZ`
+### Active Node Registry
 
-### Active Routing Paths
+The simulator provisions the following cognitive endpoints, distributed across specific bandwidth channels to isolate concurrent harvesting.
+
+| Node ID | Designation | Category | Operating Freq. | Base Packets | State |
+| :---: | :--- | :--- | :---: | :---: | :--- |
+| **01** | SEMANTIC CORE ENGINE | SYSTEM CENTRAL | 8.40 GHZ | 4,291 | `COHESIVE` |
+| **02** | NEP COURSE INTEGRATOR | SYLLABI PARSER | 5.20 GHZ | 1,205 | `COHESIVE` |
+| **03** | PREVIOUS YEAR BLUEPRINTS | DECODING NODE | 2.40 GHZ | 3,410 | `BYPASS` |
+| **04** | CONCURRENT HARVESTER | WEB SCRAPER | 5.20 GHZ | 981 | `BYPASS` |
+| **05** | COGNITIVE BLUEPRINT UNIT | VECTOR STACK | 8.40 GHZ | 2,154 | `COHESIVE` |
+| **06** | TAXONOMY MAPPING CORNER | BLUEPRINT HEURISTICS | 2.40 GHZ | 692 | `BYPASS` |
+
+### Crawler Configurations
+The engine can be tuned via the **Matrix Settings Console v3** applying varying constraints on network scrapes.
+
+| Protocol Configuration | Technical Purpose | Bandwidth Load |
+| :--- | :--- | :--- |
+| **AUTO_EMBED** | Semantic Embed Matcher (Low Latency) | Sub 100 KBPS |
+| **DEEP_SCAN** | Deep Multi-Hop Root Scan (Aggressive) | Variable Peak |
+| **CONCURRENT_HARVEST** | Concurrent Subject Harvester (Batching) | Sustained High |
+
+### Active Routing Paths Breakdown
+Telemetry data travels through dedicated architectural scopes:
 * `GATEWAY_PRIMARY // SECURE.01`
 * `GATEWAY_REDUNDANT // SYLC.02`
 * `GATEWAY_DISTRIBUTED // COGN.03`
 
 ---
 
-## DEPLOYMENT PROTOCOL
+## ✦ 4. DEPLOYMENT & LOCAL BOOT PROTOCOL
 
-**1. Environment Configuration**
-Secure the perimeter by cloning environment variables:
+To instantiate the console on local developer environments:
+
+**1. Define the Environmental Core**
+Secure the database references required for the waitlist gateway.
 ```bash
 cp .env.example .env
 ```
-*(Ensure Firebase properties are defined)*
+*(Ensure `VITE_FIREBASE_*` properties are defined as per Firebase console.)*
 
-**2. Package Verification**
-Initialize the local working tree:
+**2. Initialize Node Modules**
+Compile the required system packages.
 ```bash
 npm install
 ```
 
-**3. Engine Ignition**
-Mount the development server:
+**3. Ignite the Engine**
+Mount the Vite development server to begin routing operations.
 ```bash
 npm run dev
 ```
 
-*(Access the primary interface port at http://localhost:3000)*
+The primary interface will securely bind to port `3000`. Navigate to `http://localhost:3000` via your trusted browser tunnel.
+
+---
+> *DELHI UNIVERSITY RESEARCH ENGINE // ALL REGISTERED PROTOCOLS COMPLIANT WITH OPEN ARCHIVES.*
