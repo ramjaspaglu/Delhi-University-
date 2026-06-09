@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Zap } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Database, Activity, GitCommit } from "lucide-react";
 
 interface AlgorithmAnalyticsProps {
   totalCourses: number;
@@ -7,74 +7,96 @@ interface AlgorithmAnalyticsProps {
   totalMaterials: number;
 }
 
-export default function AlgorithmAnalytics({ totalCourses, totalSubjects, totalMaterials }: AlgorithmAnalyticsProps) {
+export default function AlgorithmAnalytics({
+  totalCourses,
+  totalSubjects,
+  totalMaterials,
+}: AlgorithmAnalyticsProps) {
   const [opsCount, setOpsCount] = useState(48240);
+  const [latency, setLatency] = useState(8.4);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setOpsCount(p => p + Math.floor(Math.random() * 3) + 1);
+      setOpsCount((p) => p + Math.floor(Math.random() * 3) + 1);
+      setLatency(8.0 + Math.random() * 1.5);
     }, 3050);
     return () => clearInterval(timer);
   }, []);
 
-  const totalSegments = Math.max(128, totalCourses * 12 + totalSubjects * 4 + totalMaterials);
+  const totalSegments = Math.max(
+    128,
+    totalCourses * 12 + totalSubjects * 4 + totalMaterials,
+  );
 
   return (
-    <div className="w-full bg-white border border-slate-200/80 rounded-apple-2xl shadow-sm p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-left">
-      
-      {/* Light Theme Left Wing: Small Green Efficiency Label/Badge & Paradigm Pitch */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-600 text-white text-[8px] sm:text-[9.5px] font-black uppercase tracking-[0.15em] rounded font-sharp shadow-xs shrink-0">
-          <Zap size={10} className="fill-white" />
-          <span>O(LOG N) EFFICIENCY COMPLIANT</span>
+    <div className="w-full bg-slate-950 border-y sm:border-y border-x-0 sm:border sm:border-x sm:border-x border-slate-800 rounded-none sm:rounded-none sm:rounded-apple-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-left shadow-lg overflow-hidden relative">
+      {/* Background Grid Pattern */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-20"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)",
+          backgroundSize: "16px 16px",
+        }}
+      />
+
+      <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="inline-flex items-center justify-center w-10 h-10 bg-emerald-950 border-y sm:border-y border-x-0 sm:border sm:border-x sm:border-x border-emerald-800 text-emerald-500 rounded-none sm:rounded-apple shrink-0">
+          <Activity size={18} />
         </div>
-        <div className="space-y-0.5">
-          <span className="text-[9.5px] font-black text-slate-900 uppercase tracking-widest block font-sharp">
-            ALGORITHMIC PATHWAY ROUTER
+        <div className="space-y-1">
+          <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] block font-mono">
+            System Telemetry
           </span>
-          <p className="text-[8.5px] text-slate-450 uppercase font-bold leading-normal">
-            Query index mapping resolved in logarithmic runtime bounds rather than linear server queries.
+          <p className="text-[9px] text-slate-400 uppercase font-bold leading-relaxed tracking-wider max-w-sm">
+            Live crawler aggregations and index mapping operations running
+            securely at scale.
           </p>
         </div>
       </div>
 
-      {/* Light Theme Right Wing: High-precision performance indexes */}
-      <div className="flex items-center gap-5 sm:gap-7 shrink-0 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-slate-100 pt-3 md:pt-0">
-        
-        <div className="space-y-0.5">
-          <span className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest block font-mono">
-            QUERY LATENCY
+      <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 border-t md:border-t-0 md:border-l border-slate-800 pt-4 md:pt-0 md:pl-6 w-full md:w-auto">
+        <div className="space-y-1">
+          <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest block font-mono flex items-center gap-1">
+            <GitCommit size={10} /> LATENCY
           </span>
-          <div className="flex items-baseline gap-0.5">
-            <span className="text-xs sm:text-sm font-black text-slate-950 font-sharp">8.4</span>
-            <span className="text-[7.5px] font-extrabold text-slate-400 font-mono">MS</span>
+          <div className="flex items-baseline gap-1">
+            <span className="text-sm font-black text-white font-mono">
+              {latency.toFixed(1)}
+            </span>
+            <span className="text-[8px] font-bold text-slate-500 font-mono">
+              MS
+            </span>
           </div>
         </div>
 
-        <div className="h-5 w-[1px] bg-slate-200 hidden sm:block" />
-
-        <div className="space-y-0.5">
-          <span className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest block font-mono">
-            CACHED NODES
+        <div className="space-y-1">
+          <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest block font-mono flex items-center gap-1">
+            <Database size={10} /> NODES
           </span>
-          <span className="text-xs sm:text-sm font-black text-slate-950 font-sharp block">
+          <span className="text-sm font-black text-white font-mono block">
             {totalSegments}
           </span>
         </div>
 
-        <div className="h-5 w-[1px] bg-slate-200 hidden sm:block" />
-
-        <div className="space-y-0.5 text-right md:text-left">
-          <span className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest block font-mono">
-            CACHE RATIO
+        <div className="space-y-1">
+          <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest block font-mono">
+            OPERATIONS
           </span>
-          <span className="text-xs sm:text-sm font-black text-emerald-600 font-sharp block">
-            98.4%
+          <span className="text-sm font-black text-white font-mono block">
+            {opsCount.toLocaleString()}
           </span>
         </div>
 
+        <div className="space-y-1">
+          <span className="text-[8px] font-black text-emerald-500/70 uppercase tracking-widest block font-mono">
+            INDEX HEALTH
+          </span>
+          <span className="text-sm font-black text-emerald-400 font-mono block">
+            99.9%
+          </span>
+        </div>
       </div>
-
     </div>
   );
 }

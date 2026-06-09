@@ -1,20 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { db } from '../lib/firebase';
-import { Files } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { db } from "../lib/firebase";
+import { Files } from "lucide-react";
 
 interface CourseMaterialsCountProps {
   courseId: string;
 }
 
-export default function CourseMaterialsCount({ courseId }: CourseMaterialsCountProps) {
+export default function CourseMaterialsCount({
+  courseId,
+}: CourseMaterialsCountProps) {
   const [count, setCount] = useState<number | null>(null);
 
   useEffect(() => {
     // 1. Get real-time subjects matching this courseId
     const subjectsQuery = query(
-      collection(db, 'subjects'),
-      where('courseId', '==', courseId)
+      collection(db, "subjects"),
+      where("courseId", "==", courseId),
     );
 
     const unsubscribeSubjects = onSnapshot(
@@ -31,8 +33,8 @@ export default function CourseMaterialsCount({ courseId }: CourseMaterialsCountP
         // Firestore 'in' matches up to 30 items
         const targetSubjectIds = subjectIds.slice(0, 30);
         const materialsQuery = query(
-          collection(db, 'materials'),
-          where('subjectId', 'in', targetSubjectIds)
+          collection(db, "materials"),
+          where("subjectId", "in", targetSubjectIds),
         );
 
         const unsubscribeMaterials = onSnapshot(
@@ -42,8 +44,11 @@ export default function CourseMaterialsCount({ courseId }: CourseMaterialsCountP
             setCount(materialsSnapshot.size);
           },
           (error) => {
-            console.error(`Firebase materials count failed for course ${courseId}:`, error);
-          }
+            console.error(
+              `Firebase materials count failed for course ${courseId}:`,
+              error,
+            );
+          },
         );
 
         return () => {
@@ -51,8 +56,11 @@ export default function CourseMaterialsCount({ courseId }: CourseMaterialsCountP
         };
       },
       (error) => {
-        console.error(`Firebase subjects fetch failed for course ${courseId}:`, error);
-      }
+        console.error(
+          `Firebase subjects fetch failed for course ${courseId}:`,
+          error,
+        );
+      },
     );
 
     return () => {
@@ -62,22 +70,27 @@ export default function CourseMaterialsCount({ courseId }: CourseMaterialsCountP
 
   if (count === null) {
     return (
-      <div className="mt-3 flex items-center justify-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-100 rounded-apple text-[9px] font-black uppercase tracking-widest text-slate-400 animate-pulse">
+      <div className="mt-3 flex items-center justify-center gap-1.5 px-3 py-1 bg-slate-50 border-y sm:border-y border-x-0 sm:border sm:border-x sm:border-x border-slate-100 rounded-none sm:rounded-apple text-[9px] font-black uppercase tracking-widest text-slate-400 animate-pulse">
         <span>Counting...</span>
       </div>
     );
   }
 
   return (
-    <div 
-      className={`mt-3 flex items-center justify-center gap-1.5 px-3 py-1 border rounded-apple text-[9px] font-black uppercase tracking-widest transition-all ${
-        count > 0 
-          ? 'bg-emerald-50/50 border-emerald-100 text-emerald-700' 
-          : 'bg-slate-50 border-slate-100 text-slate-400'
+    <div
+      className={`mt-3 flex items-center justify-center gap-1.5 px-3 py-1 border-y border-x-0 sm:border sm:border-x rounded-none sm:rounded-apple text-[9px] font-black uppercase tracking-widest transition-all ${
+        count > 0
+          ? "bg-emerald-50/50 border-emerald-100 text-emerald-700"
+          : "bg-slate-50 border-slate-100 text-slate-400"
       }`}
     >
-      <Files size={10} className={count > 0 ? 'text-emerald-600' : 'text-slate-400'} />
-      <span>{count} {count === 1 ? 'material' : 'materials'}</span>
+      <Files
+        size={10}
+        className={count > 0 ? "text-emerald-600" : "text-slate-400"}
+      />
+      <span>
+        {count} {count === 1 ? "material" : "materials"}
+      </span>
     </div>
   );
 }

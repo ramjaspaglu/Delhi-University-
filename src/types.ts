@@ -2,7 +2,7 @@ export interface Course {
   id: string;
   name: string;
   description: string;
-  level: 'UG' | 'PG';
+  level: "UG" | "PG";
   durationYears: number;
   nepBased: boolean;
 }
@@ -21,7 +21,7 @@ export interface Material {
   subjectId: string;
   title: string;
   url: string;
-  type: 'PDF' | 'VIDEO' | 'LINK' | 'NOTES';
+  type: "PDF" | "VIDEO" | "LINK" | "NOTES";
   author?: string;
   submittedBy?: string;
   submittedAt?: string;
@@ -37,7 +37,7 @@ export interface Material {
 
 export interface Submission {
   id: string;
-  submissionType: 'MATERIAL' | 'SUBJECT_PROPOSAL';
+  submissionType: "MATERIAL" | "SUBJECT_PROPOSAL";
   title: string;
   url?: string;
   type?: string;
@@ -45,7 +45,7 @@ export interface Submission {
   subjectName: string;
   semester: number;
   submittedByEmail: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: "PENDING" | "APPROVED" | "REJECTED";
   description?: string;
 }
 

@@ -1,0 +1,205 @@
+src/components/NotificationsPage.tsx:            {filteredNotifications.map((notif) => {
+src/components/AIFeatures.tsx:                    ).map((p) => (
+src/components/AIFeatures.tsx:                      getNodes().map((nodeFrac, idx) => {
+src/components/AIFeatures.tsx:                          ? Math.min(...trajectory.map((p) => p.r)).toFixed(3)
+src/components/AIFeatures.tsx:                          {relativityResult.phenomenaObserved.map(
+src/components/AIFeatures.tsx:                    {diagLogs.map((log, idx) => (
+src/components/AIFeatures.tsx:                        {diagResult.strengths.map((str, idx) => (
+src/components/AIFeatures.tsx:                        {diagResult.weaknesses.map((weak, idx) => (
+src/components/AIFeatures.tsx:                        {diagResult.suggestedActions.map((act, idx) => (
+src/components/AIFeatures.tsx:                        {diagResult.recommendedResearchSubfields.map(
+src/components/ResourceAggregator.tsx:        const subList = snapshot.docs.map(
+src/components/ResourceAggregator.tsx:        const matList = snapshot.docs.map(
+src/components/ResourceAggregator.tsx:          const externalFormat: Material[] = data.links.map(
+src/components/ResourceAggregator.tsx:  ].map((material) => {
+src/components/ResourceAggregator.tsx:              {courses.map((course) => (
+src/components/ResourceAggregator.tsx:            {popularTags.map(([tag, count]) => {
+src/components/ResourceAggregator.tsx:                  return groupKeys.map((key) => {
+src/components/ResourceAggregator.tsx:                          {groupItems.map((item) => {
+src/components/ResourceAggregator.tsx:                                        {material.tags.map((tag) => {
+src/components/ResourceAggregator.tsx:              {paginatedData.map((item, index) => {
+src/components/ResourceAggregator.tsx:                          {material.tags.map((tag) => {
+src/components/ResourceAggregator.tsx:                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+src/components/AlgorithmAnalytics.tsx:            Live crawler aggregations and index mapping operations running
+src/components/ProfilePage.tsx:        const data = snapshot.docs.map(
+src/components/ProfilePage.tsx:            {submissions.map((sub) => (
+src/components/Chat.tsx:            {messages.map((m, i) => (
+src/components/Roadmap.tsx:export const Roadmap = ({ user }: { user?: any }) => {
+src/components/Roadmap.tsx:                    "Configure fast discrete Fourier transforms for coordinate state maps",
+src/components/Roadmap.tsx:          const fetched = snapshot.docs.map(
+src/components/Roadmap.tsx:  // AI Roadmap Architect triggering
+src/components/Roadmap.tsx:      const res = await fetch("/api/ai/generate-feature-roadmap", {
+src/components/Roadmap.tsx:            id="bento-roadmap-h2"
+src/components/Roadmap.tsx:            {filteredStages.map((stg) => {
+src/components/Roadmap.tsx:                {activeStage.highlights.map((highlight, idx) => (
+src/components/Roadmap.tsx:                {activeStage.growthObjectives.map((metric, mIdx) => (
+src/components/Roadmap.tsx:                {proposals.map((proposal) => {
+src/components/Roadmap.tsx:                                    {proposal.milestones.map((m, mIdx) => (
+src/components/Roadmap.tsx:                                          {m.subtasks.map(
+src/components/Roadmap.tsx:                        It maps theoretical formulations, particle solvers, and
+src/components/Roadmap.tsx:                        {aiGeneratedMilestones.map((m, idx) => (
+src/components/Roadmap.tsx:                              {m.subtasks.map((sub: string, sIdx: number) => (
+src/components/CourseMaterialsCount.tsx:        const subjectIds = subjectsSnapshot.docs.map((doc) => doc.id);
+src/components/Loader.tsx:      {Array.from({ length: count }).map((_, i) => (
+src/components/LiveSearch.tsx:  const categories = ["All", ...new Set(results.map((r) => r.category))];
+src/components/LiveSearch.tsx:              {categories.map((cat) => (
+src/components/LiveSearch.tsx:                  {paginatedResults.map((r, i) => (
+src/components/CollegesBrowser.tsx:  const colleges: College[] = DU_COLLEGES_DATA.map((col, index) => ({
+src/components/CollegesBrowser.tsx:            {campuses.map((campus) => (
+src/components/CollegesBrowser.tsx:              {filteredColleges.map((college, idx) => (
+src/components/CollegesBrowser.tsx:                      {college.courseNames.map((courseName) => (
+src/components/CollegesBrowser.tsx:            {filteredColleges.map((college, idx) => (
+src/components/CollegesBrowser.tsx:                      {college.courseNames.map((courseName) => (
+src/components/OnboardingModal.tsx:                {DU_COLLEGES.map((clg) => (
+src/components/DeepResearchLabs.tsx:        (materials || []).map((m: any) => m.url?.toLowerCase())
+src/components/DeepResearchLabs.tsx:            `Packing payload indexes for Gemini-led semantic mapping...`,
+src/components/DeepResearchLabs.tsx:          const itemsPayload = verifiedItems.map((item: any) => ({
+src/components/DeepResearchLabs.tsx:              `Gemini semantic mapping skipped due to API latency. Proceeding to next...`,
+src/components/DeepResearchLabs.tsx:            `AI Model assigned subjects & syllabus structure mapped successfully.`,
+src/components/DeepResearchLabs.tsx:      .map(
+src/components/DeepResearchLabs.tsx:          {(Object.keys(modules) as Array<keyof typeof modules>).map((key) => {
+src/components/DeepResearchLabs.tsx:                        {[1, 2].map((d) => (
+src/components/DeepResearchLabs.tsx:                        {[5, 10, 20].map((l) => (
+src/components/DeepResearchLabs.tsx:                      {PRESETS.map((p, idx) => (
+src/components/DeepResearchLabs.tsx:                      {agents.map((agent, idx) => (
+src/components/DeepResearchLabs.tsx:                          {agents.map((ag) => (
+src/components/DeepResearchLabs.tsx:                        filteredLogs.map((log, i) => {
+src/components/DeepResearchLabs.tsx:                              {sandboxResult.issues.map((issue: string, idx: number) => (
+src/components/DeepResearchLabs.tsx:                      {modules[activeTab].features.map((feature, idx) => (
+src/components/DeepResearchLabs.tsx:                          materials.slice(0, 5).map((m, i) => (
+src/components/DeepResearchLabs.tsx:                            subjects.slice(0, 4).map((sub, i) => (
+src/components/DeepResearchLabs.tsx:                        ].map((stat, i) => {
+src/components/AdminPanel.tsx:        ...test.eval_logs.map((log) => `  ==> ${log}`),
+src/components/AdminPanel.tsx:        const subs = snapshot.docs.map(
+src/components/AdminPanel.tsx:        const subs = snapshot.docs.map((doc) => ({
+src/components/AdminPanel.tsx:        const mats = snapshot.docs.map((doc) => ({
+src/components/AdminPanel.tsx:        const parsed = snapshot.docs.map((doc) => ({
+src/components/AdminPanel.tsx:        const uList = snapshot.docs.map((doc) => ({
+src/components/AdminPanel.tsx:        const logs = snapshot.docs.map((doc) => ({
+src/components/AdminPanel.tsx:        const docs = snapshot.docs.map((doc) => ({
+src/components/AdminPanel.tsx:        const docs = snapshot.docs.map((doc) => ({
+src/components/AdminPanel.tsx:        const batchDeletes = snap.docs.map((d) =>
+src/components/AdminPanel.tsx:        `Gemini Classification complete. Auto-mapped ${classifications.length} documents.`,
+src/components/AdminPanel.tsx:          `Staged Reference: ${urlLink.substring(0, 36)}... mapped to Category: ${formatType}`,
+src/components/AdminPanel.tsx:    const requestItems = selectedStaged.map((item) => ({
+src/components/AdminPanel.tsx:        return prev.map((item) => {
+src/components/AdminPanel.tsx:        // Handle Gemini AI's dynamic node mapping requests
+src/components/AdminPanel.tsx:                      autopilotConsole.map((l, i) => (
+src/components/AdminPanel.tsx:                      {autopilotLogs.map((log) => (
+src/components/AdminPanel.tsx:                  desc: "Direct mapping of solitary files",
+src/components/AdminPanel.tsx:              ].map((mod) => {
+src/components/AdminPanel.tsx:                        ].map((wp) => (
+src/components/AdminPanel.tsx:                        Pre-mapped API routes that automatically traverse
+src/components/AdminPanel.tsx:                      ].map((portal) => {
+src/components/AdminPanel.tsx:                    logs.map((log, lIdx) => (
+src/components/AdminPanel.tsx:                    Pre-commit hook buffer. Modify mapped classifications before
+src/components/AdminPanel.tsx:                                prev.map((s) => ({ ...s, selected: checked })),
+src/components/AdminPanel.tsx:                      {stagedItems.map((item) => (
+src/components/AdminPanel.tsx:                                  prev.map((s) =>
+src/components/AdminPanel.tsx:                                  prev.map((s) =>
+src/components/AdminPanel.tsx:                                item.tags.map((tg: string) => (
+src/components/AdminPanel.tsx:                  courses.map((course) => {
+src/components/AdminPanel.tsx:                    {courses.map((c) => (
+src/components/AdminPanel.tsx:                  allSubjects.map((sub) => {
+src/components/AdminPanel.tsx:                    const mappedCourse = courses.find(
+src/components/AdminPanel.tsx:                                {mappedCourse && (
+src/components/AdminPanel.tsx:                                    PROGRAMME: {mappedCourse.name}
+src/components/AdminPanel.tsx:                      .map((sub) => sub.id)
+src/components/AdminPanel.tsx:                      .map((sub) => sub.id)
+src/components/AdminPanel.tsx:                return filtered.map((sub, idx) => {
+src/components/AdminPanel.tsx:                                    {auditReports[sub.id].issues.map(
+src/components/AdminPanel.tsx:                    {allSubjects.map((sub) => (
+src/components/AdminPanel.tsx:                  return filtered.map((mat) => {
+src/components/AdminPanel.tsx:                  academic credentials, roll numbers, college mappings, and
+src/components/AdminPanel.tsx:                        .map((u) => {
+src/components/AdminPanel.tsx:                behaviorLogs.map((log) => log.userEmail || "").filter(Boolean),
+src/components/AdminPanel.tsx:              .map((log) => log.details.query.trim().toLowerCase());
+src/components/AdminPanel.tsx:                      behavioral maps.
+src/components/AdminPanel.tsx:                      ].map((bar, idx) => {
+src/components/AdminPanel.tsx:                        {uniqueStudentEmails.map((email) => (
+src/components/AdminPanel.tsx:                        {studentTraces.map((trace, traceIdx) => {
+src/components/AdminPanel.tsx:                        .map((log) => {
+src/components/AdminPanel.tsx:                    vectors) mapping to identity spoofing, value poisoning,
+src/components/AdminPanel.tsx:                        simulationLogs.map((logLine, idx) => {
+src/components/AdminPanel.tsx:                        Relational validation ensures courses mapping node keys
+src/components/AdminPanel.tsx:                    {threatAlerts.map((alertItem) => (
+src/components/AdminPanel.tsx:                    {(["ALL", "PENDING", "RESOLVED"] as const).map(
+src/components/AdminPanel.tsx:                    {filteredReports.map((report) => (
+src/components/AdminPanel.tsx:                    {betaRequests.map((req) => (
+src/components/AdminPanel.tsx:              courses: (courses || []).map(c => ({ id: c.id, name: c.name })).slice(0, 10),
+src/components/AdminPanel.tsx:              subjects: (allSubjects || []).map(s => ({ id: s.id, name: s.name, courseId: s.courseId })).slice(0, 20),
+src/components/AdminPanel.tsx:              materials: (allMaterialsList || []).map(m => ({ id: m.id, title: m.title, url: m.url })).slice(0, 20),
+src/components/AdminPanel.tsx:      const deletions = Array.from(toDelete).map((id) =>
+src/components/AdminPanel.tsx:      const deletions = Array.from(selectedForDeletion).map((id) =>
+src/components/AdminPanel.tsx:              {duplicateGroups.map((group, idx) => (
+src/components/AdminPanel.tsx:                    {group.items.map((item: any) => (
+src/components/AdminPanel.tsx:         {history.map((h, i) => (
+src/components/HealthPage.tsx:                {telemetry?.scrapers.map((scraper) => (
+src/components/MainFeaturesList.tsx:      subtitle: "Campus-wide curriculum mapping",
+src/components/MainFeaturesList.tsx:        "Automated directory schema mapping for new course suggestions",
+src/components/MainFeaturesList.tsx:      subtitle: "Semester-by-semester node mapping",
+src/components/MainFeaturesList.tsx:        {features.map((feat, idx) => {
+src/components/MainFeaturesList.tsx:                  {feat.details.map((detail, dIdx) => (
+src/App.tsx:import { Roadmap } from "./components/Roadmap";
+src/App.tsx:        const list = snap.docs.map(
+src/App.tsx:          {pathParts.map((part, i) => (
+src/App.tsx:          {filteredItems.map((item, i) => (
+src/App.tsx:            return Object.entries(groups).map(([cat, catItems], idx) => (
+src/App.tsx:                  {catItems.map((item, i) => {
+src/App.tsx:                      allSubjectsList.map((sub) => (
+src/App.tsx:        {stats.map((stat, i) => (
+src/App.tsx:              recentSubmissions.map((sub, i) => (
+src/App.tsx:            {filteredOptions.map((opt, i) => (
+src/App.tsx:      .map((t) => t.trim().toUpperCase())
+src/App.tsx:        .map((t) => t.trim().toUpperCase())
+src/App.tsx:        setExistingSubjects(snap.docs.map((d) => d.data().name));
+src/App.tsx:            data.files.map((f: any) => ({
+src/App.tsx:      .map((t) => t.trim().toUpperCase())
+src/App.tsx:            options={existingCourses.map((c) => c.name)}
+src/App.tsx:                  {customTags.map((tag, idx) => (
+src/App.tsx:                            fetchedDriveFiles.map((f) => ({
+src/App.tsx:                      {fetchedDriveFiles.map((file, idx) => (
+src/App.tsx:                                prev.map((f, i) =>
+src/App.tsx:                          {aiCheckResult.issues.map((issue, idx) => (
+src/App.tsx:              {tabs.map((tab) => (
+src/App.tsx:              {tabs.map((tab) => {
+src/App.tsx:          .map((c) => {
+src/App.tsx:          .map((c) => c.course);
+src/App.tsx:        const allSubjects = subjectsSnap.docs.map(
+src/App.tsx:          .map((s) => {
+src/App.tsx:          .map((s) => s.subject);
+src/App.tsx:          .map((d) => d.data())
+src/App.tsx:        const data = snapshot.docs.map(
+src/App.tsx:      const data = snapshot.docs.map((doc: any) => ({
+src/App.tsx:          .map((doc: any) => ({ id: doc.id, _mode: "global", ...doc.data() }))
+src/App.tsx:        const data = snapshot.docs.map(
+src/App.tsx:        ...materials.map((m) => [
+src/App.tsx:      const existingCourses = coursesSnap.docs.map(
+src/App.tsx:        const existingSubjects = subSnap.docs.map(
+src/App.tsx:      const data = snapshot.docs.map(
+src/App.tsx:        const data = snapshot.docs.map(
+src/App.tsx:                  ].map((term) => (
+src/App.tsx:                      {globalSearchResults.courses.map((course) => (
+src/App.tsx:                            No matching courses mapped.
+src/App.tsx:                      {globalSearchResults.subjects.map((sub) => (
+src/App.tsx:                            const data = snapshot.docs.map(
+src/App.tsx:                      Development Roadmap
+src/App.tsx:                    ].map((stage, idx) => (
+src/App.tsx:                  ].map((term) => (
+src/App.tsx:                    ].map((feature, i) => (
+src/App.tsx:                      ].map((s, i) => (
+src/App.tsx:                    {bookmarkedMaterials.map((m, idx) => (
+src/App.tsx:                        {courses.map((course) => (
+src/App.tsx:                    bookmarkedIds={bookmarkedMaterials.map((m) => m.id)}
+src/App.tsx:                            `Course details for "${courseName}" are mapping soon. Try browsing other nodes!`,
+src/App.tsx:                      {QUESTION_PAPERS_ARCHIVE.map((categoryGroup, idx) => (
+src/App.tsx:                            {categoryGroup.courses.map((course, cIdx) => (
+src/App.tsx:                                  {course.links.map((link, lIdx) => (
+src/App.tsx:                    .map((sub) => (
+src/App.tsx:                  return groupKeys.map((key) => {
+src/App.tsx:                          {groupItems.map((m) => {
+src/App.tsx:                                        .map((tag) => (
+src/App.tsx:                          ].map((clg) => (
+src/App.tsx:                        privacy covenant system to map my student coordinates.
+src/App.tsx:                                        .map((sub) => {
+src/lib/firebase.ts:        auth.currentUser?.providerData?.map((provider) => ({

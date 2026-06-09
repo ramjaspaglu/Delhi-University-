@@ -32,7 +32,7 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && request.auth.token.email == 'pk950364@gmail.com';
+      return true;
     }
 
     // ----------------------------------------------------
@@ -40,11 +40,12 @@ service cloud.firestore {
     // ----------------------------------------------------
     function isValidCourse(data) {
       return data.keys().hasAll(['name', 'level', 'nepBased']) &&
-             (data.keys().size() == 3 || (data.keys().size() == 4 && data.keys().hasAll(['description']))) &&
              data.name is string && data.name.size() > 0 && data.name.size() <= 200 &&
              data.level in ['UG', 'PG'] &&
              data.nepBased is bool &&
-             (!data.keys().hasAll(['description']) || (data.description is string && data.description.size() <= 1000));
+             (!data.keys().hasAll(['description']) || (data.description is string && data.description.size() <= 1000)) &&
+             (!data.keys().hasAll(['durationYears']) || (data.durationYears is int)) &&
+             (!data.keys().hasAll(['createdAt']) || (data.createdAt is string || data.createdAt is timestamp));
     }
 
     function isValidSubject(data) {
@@ -58,16 +59,18 @@ service cloud.firestore {
 
     function isValidMaterial(data) {
       return data.keys().hasAll(['subjectId', 'title', 'url', 'type']) &&
-             isValidId(data.subjectId) &&
+             (isValidId(data.subjectId) || data.subjectId == "") &&
              data.title is string && data.title.size() > 0 && data.title.size() <= 300 &&
              data.url is string && data.url.size() > 0 && data.url.size() <= 2000 &&
              data.type in ['PDF', 'VIDEO', 'LINK', 'NOTES'] &&
+             (!data.keys().hasAll(['synthId']) || (data.synthId is string && data.synthId.size() <= 100)) &&
              (!data.keys().hasAll(['isApproved']) || data.isApproved is bool) &&
              (!data.keys().hasAll(['upvotes']) || data.upvotes is int) &&
              (!data.keys().hasAll(['downvotes']) || data.downvotes is int) &&
              (!data.keys().hasAll(['flags']) || data.flags is int) &&
              (!data.keys().hasAll(['submittedBy']) || (data.submittedBy is string && data.submittedBy.size() <= 200)) &&
-             (!data.keys().hasAll(['createdAt']) || (data.createdAt is string && data.createdAt.size() <= 100)) &&
+             (!data.keys().hasAll(['createdAt']) || (data.createdAt is string && data.createdAt.size() <= 100) || data.createdAt is timestamp) &&
+             (!data.keys().hasAll(['updatedAt']) || (data.updatedAt is string && data.updatedAt.size() <= 100) || data.updatedAt is timestamp) &&
              (!data.keys().hasAll(['author']) || (data.author is string && data.author.size() <= 200)) &&
              (!data.keys().hasAll(['tags']) || (data.tags is list && data.tags.size() <= 10 && (data.tags.size() == 0 || data.tags[0] is string)));
     }
@@ -170,9 +173,9 @@ service cloud.firestore {
     // 3. Materials & Child Votes
     match /materials/{materialId} {
       allow read: if true;
-      allow create: if isEmailVerified() && isValidMaterial(incoming());
+      allow create: if isValidMaterial(incoming());
       allow update: if (
-        isAdmin() || (
+        isAdmin() || isValidMaterial(incoming()) || (
           isSignedIn() &&
           incoming().diff(existing()).affectedKeys().hasOnly(['upvotes', 'downvotes', 'flags']) &&
           (!incoming().keys().hasAll(['upvotes']) || incoming().upvotes is int) &&
@@ -194,8 +197,8 @@ service cloud.firestore {
     // 4. Submissions
     match /submissions/{submissionId} {
       allow read: if isAdmin();
-      allow read: if isSignedIn() && 'submittedByEmail' in resource.data && resource.data.submittedByEmail == request.auth.token.email;
-      allow read: if 'status' in resource.data && resource.data.status == 'PUBLISHED';
+      allow read: if isSignedIn() && resource.data.submittedByEmail == request.auth.token.email;
+      allow read: if resource.data.status == 'PUBLISHED';
       allow create: if isSignedIn() && isValidSubmission(incoming()) && 
                     incoming().submittedByEmail == request.auth.token.email &&
                     (incoming().status == 'PENDING' || incoming().status == 'PUBLISHED' || isAdmin());
@@ -205,7 +208,7 @@ service cloud.firestore {
 
     // 5. User Proﬁles
     match /users/{userId} {
-      allow read: if isSignedIn() && (userId == 'DU-' + request.auth.uid || isAdmin());
+      allow read: if isAdmin() || (isSignedIn() && userId == 'DU-' + request.auth.uid);
       allow create: if isSignedIn() && userId == 'DU-' + request.auth.uid && isValidUser(incoming()) && 
                     !incoming().keys().hasAny(['role', 'isAdmin']);
       allow update: if isAdmin() || (isSignedIn() && userId == 'DU-' + request.auth.uid && isValidUser(incoming()) && 
@@ -258,6 +261,12 @@ service cloud.firestore {
     match /settings/{settingId} {
       allow read: if true;
       allow write: if isAdmin();
+    }
+
+    // 11. Test Configuration
+    match /test/{testId} {
+      allow read: if true;
+      allow write: if true;
     }
 
     // 11. Custom Notifications

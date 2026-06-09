@@ -1,4 +1,4 @@
-import firebaseConfig from '../../firebase-applet-config.json';
+import firebaseConfig from "../../firebase-applet-config.json";
 
 let isGapiLoaded = false;
 let isPickerLoaded = false;
@@ -10,13 +10,13 @@ export function loadGooglePickerScript(): Promise<void> {
       return;
     }
 
-    if (typeof window === 'undefined') {
-      reject(new Error('Window not found'));
+    if (typeof window === "undefined") {
+      reject(new Error("Window not found"));
       return;
     }
 
     // Check if script is already present
-    const existingScript = document.getElementById('google-gapi-script');
+    const existingScript = document.getElementById("google-gapi-script");
     if (existingScript) {
       const checkInterval = setInterval(() => {
         if ((window as any).gapi && (window as any).gapi.picker) {
@@ -29,25 +29,25 @@ export function loadGooglePickerScript(): Promise<void> {
       return;
     }
 
-    const script = document.createElement('script');
-    script.id = 'google-gapi-script';
-    script.src = 'https://apis.google.com/js/api.js';
+    const script = document.createElement("script");
+    script.id = "google-gapi-script";
+    script.src = "https://apis.google.com/js/api.js";
     script.async = true;
     script.defer = true;
     script.onload = () => {
-      (window as any).gapi.load('picker', {
+      (window as any).gapi.load("picker", {
         callback: () => {
           isGapiLoaded = true;
           isPickerLoaded = true;
           resolve();
         },
         onerror: () => {
-          reject(new Error('Failed to load Google Picker extension'));
-        }
+          reject(new Error("Failed to load Google Picker extension"));
+        },
       });
     };
     script.onerror = () => {
-      reject(new Error('Failed to load Google API Client script'));
+      reject(new Error("Failed to load Google API Client script"));
     };
 
     document.body.appendChild(script);
@@ -64,13 +64,13 @@ export interface GooglePickerFile {
 export function openGooglePicker(
   accessToken: string,
   onFileSelect: (file: GooglePickerFile) => void,
-  onCancel?: () => void
+  onCancel?: () => void,
 ): void {
   const gapi = (window as any).gapi;
   const google = (window as any).google;
 
   if (!gapi || !gapi.picker || !google || !google.picker) {
-    console.error('Google Picker not loaded.');
+    console.error("Google Picker not loaded.");
     return;
   }
 
@@ -86,14 +86,16 @@ export function openGooglePicker(
         mimeType: doc[google.picker.Document.MIME_TYPE],
       };
       onFileSelect(selectedFile);
-    } else if (data[google.picker.Response.ACTION] === google.picker.Action.CANCEL) {
+    } else if (
+      data[google.picker.Response.ACTION] === google.picker.Action.CANCEL
+    ) {
       if (onCancel) onCancel();
     }
   };
 
   try {
     const view = new google.picker.View(google.picker.ViewId.DOCS);
-    
+
     // Create the picker
     const picker = new google.picker.PickerBuilder()
       .addView(view)
@@ -106,6 +108,6 @@ export function openGooglePicker(
 
     picker.setVisible(true);
   } catch (error) {
-    console.error('Error constructing Google Picker:', error);
+    console.error("Error constructing Google Picker:", error);
   }
 }

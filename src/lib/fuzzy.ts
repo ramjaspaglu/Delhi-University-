@@ -17,7 +17,7 @@ function levenshteinDistance(s1: string, s2: string): number {
       d[i][j] = Math.min(
         d[i - 1][j] + 1, // deletion
         d[i][j - 1] + 1, // insertion
-        d[i - 1][j - 1] + cost // substitution
+        d[i - 1][j - 1] + cost, // substitution
       );
     }
   }
@@ -25,16 +25,25 @@ function levenshteinDistance(s1: string, s2: string): number {
   return d[m][n];
 }
 
-export function fuzzyMatch(text: string, query: string, code?: string): { matches: boolean; score: number } {
+export function fuzzyMatch(
+  text: string,
+  query: string,
+  code?: string,
+): { matches: boolean; score: number } {
   const normText = text.toLowerCase().trim();
   const normQuery = query.toLowerCase().trim();
-  const normCode = code ? code.toLowerCase().trim() : '';
+  const normCode = code ? code.toLowerCase().trim() : "";
 
   if (!normQuery) return { matches: true, score: 1 };
   if (!normText) return { matches: false, score: 0 };
 
   // 1. Direct code prefix/exact match gets a very high weight of matching
-  if (normCode && (normCode === normQuery || normCode.includes(normQuery) || normQuery.includes(normCode))) {
+  if (
+    normCode &&
+    (normCode === normQuery ||
+      normCode.includes(normQuery) ||
+      normQuery.includes(normCode))
+  ) {
     return { matches: true, score: 95 };
   }
 
@@ -65,12 +74,15 @@ export function fuzzyMatch(text: string, query: string, code?: string): { matche
     for (const tWord of textWords) {
       if (!tWord || tWord.length < 2) continue;
       if (tWord.includes(qWord)) {
-        bestWordMatchScore = Math.max(bestWordMatchScore, qWord.length / tWord.length);
+        bestWordMatchScore = Math.max(
+          bestWordMatchScore,
+          qWord.length / tWord.length,
+        );
       } else {
         const dist = levenshteinDistance(qWord, tWord);
         const maxLen = Math.max(qWord.length, tWord.length);
         const similarity = maxLen > 0 ? (maxLen - dist) / maxLen : 0;
-        
+
         // Threshold for a typo correction
         if (similarity > 0.65) {
           bestWordMatchScore = Math.max(bestWordMatchScore, similarity * 0.9);
@@ -84,15 +96,19 @@ export function fuzzyMatch(text: string, query: string, code?: string): { matche
     }
   }
 
-  const queryWordsLen = queryWords.filter(w => w.length >= 2).length;
+  const queryWordsLen = queryWords.filter((w) => w.length >= 2).length;
   if (queryWordsLen === 0) {
     // Fallback if all query words are 1 letter
-    return { matches: normText.includes(normQuery), score: normText.includes(normQuery) ? 50 : 0 };
+    return {
+      matches: normText.includes(normQuery),
+      score: normText.includes(normQuery) ? 50 : 0,
+    };
   }
 
   const wordCoverage = matchedWordsCount / queryWordsLen;
-  const averageWordScore = matchedWordsCount > 0 ? totalDistanceContribution / matchedWordsCount : 0;
-  const finalScore = (wordCoverage * 60) + (averageWordScore * 40);
+  const averageWordScore =
+    matchedWordsCount > 0 ? totalDistanceContribution / matchedWordsCount : 0;
+  const finalScore = wordCoverage * 60 + averageWordScore * 40;
 
   // If we found at least 50% of original query terms (or 1 major term)
   const matches = wordCoverage >= 0.5 && finalScore >= 40;
